@@ -11,3 +11,4 @@ public:
 	void addCardToHand(std::pair<Suit, Value> card, int position);
 	std::array<std::pair<Suit, Value>, 2> getHand();
 };
+
