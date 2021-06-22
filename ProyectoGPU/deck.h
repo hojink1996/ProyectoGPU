@@ -1,10 +1,12 @@
 #pragma once
-
+#include <array>
 class Deck
 {
 private:
-	int cards[52];
-
+	std::array<int, 52> cards;
 public:
-
+	Deck(std::array<int, 52> cards);
+	Deck();
+	void shuffle();
+	void reset();
 };
