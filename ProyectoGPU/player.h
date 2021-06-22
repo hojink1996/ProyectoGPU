@@ -5,7 +5,8 @@ class Player
 {
 private:
 	float stack;
-	Hand hand;
+	Hand& hand{ Hand() };
 public:
 	Player(float startingStack);
+	void addCardToHand(std::pair<Suit, Value> card, int position);
 };

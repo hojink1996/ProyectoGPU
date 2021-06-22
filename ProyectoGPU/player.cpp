@@ -1,8 +1,12 @@
+#include "card.h"
 #include "player.h"
 
 Player::Player(float startingStack)
 {
 	this->stack = startingStack;
-	this->hand = Hand();
 }
 
+void Player::addCardToHand(std::pair<Suit, Value> card, int position)
+{
+	this->hand.addCardToHand(card, position);
+}

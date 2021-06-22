@@ -23,9 +23,9 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Deck deck)
 		this->players.push_back(Player(startingStack));
 }
 
-void TexasHoldem::shuffleDeck()
+void TexasHoldem::resetDeck()
 {
-	this->currentDeck.shuffle();
+	this->currentDeck.reset();
 }
 
 std::pair<Suit, Value> TexasHoldem::getNextCard()
