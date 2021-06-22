@@ -3,5 +3,6 @@
 Player::Player(float startingStack)
 {
 	this->stack = startingStack;
+	this->hand = Hand();
 }
 

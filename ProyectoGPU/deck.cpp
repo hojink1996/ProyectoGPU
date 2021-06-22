@@ -11,3 +11,4 @@ Deck::Deck()
 {
 	this->cards.fill(1);
 }
+

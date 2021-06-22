@@ -7,11 +7,13 @@
     <ClCompile Include="texas-holdem.cpp" />
     <ClCompile Include="deck.cpp" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="hand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="texas-holdem.h" />
     <ClInclude Include="deck.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="card.h" />
+    <ClInclude Include="hand.h" />
   </ItemGroup>
 </Project>

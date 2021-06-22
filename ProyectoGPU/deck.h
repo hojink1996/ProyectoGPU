@@ -1,5 +1,7 @@
 #pragma once
 #include <array>
+#include "card.h"
+
 class Deck
 {
 private:
@@ -9,4 +11,5 @@ public:
 	Deck();
 	void shuffle();
 	void reset();
+	std::pair<Suit, Value> drawCard();
 };

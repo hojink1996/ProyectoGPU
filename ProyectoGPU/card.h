@@ -5,7 +5,8 @@ enum class Suit
 	Clubs,
 	Diamonds,
 	Hearts,
-	Spades
+	Spades,
+	Invalid
 };
 
 enum class Value
@@ -22,6 +23,7 @@ enum class Value
 	Ten,
 	Jack,
 	Queen,
-	King
+	King,
+	Invalid
 };
 

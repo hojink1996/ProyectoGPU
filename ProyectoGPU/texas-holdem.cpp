@@ -27,3 +27,8 @@ void TexasHoldem::shuffleDeck()
 {
 	this->currentDeck.shuffle();
 }
+
+std::pair<Suit, Value> TexasHoldem::getNextCard()
+{
+	return this->currentDeck.drawCard();
+}
