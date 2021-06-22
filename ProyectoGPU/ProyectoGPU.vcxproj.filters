@@ -3,4 +3,15 @@
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="texas-holdem.cpp" />
+    <ClCompile Include="deck.cpp" />
+    <ClCompile Include="player.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="texas-holdem.h" />
+    <ClInclude Include="deck.h" />
+    <ClInclude Include="player.h" />
+    <ClInclude Include="card.h" />
+  </ItemGroup>
 </Project>
