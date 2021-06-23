@@ -35,4 +35,20 @@ public:
 		// Test that the first and second values are not the same
 		Assert::AreNotEqual(firstValue, secondValue);
 	}
+
+	TEST_METHOD(TestShuffling)
+	{
+		// Make a brand new deck of cards and shuffle it
+		Deck testDeck = Deck();
+		testDeck.reset();
+
+		// Draw the first card
+		std::pair<Suit, Value> firstCard = testDeck.drawCard();
+
+		// Compare with the first card in an initially unshuffled deck (note that this test
+		// may fail 1/52th of the time)
+		bool suitVerification = (0 == static_cast<int>(firstCard.first));
+		bool valueVerification = (0 == static_cast<int>(firstCard.second));
+		Assert::IsFalse(suitVerification && valueVerification);
+	}
 };
