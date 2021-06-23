@@ -18,8 +18,8 @@ private:
 	int currentPosition;
 	void shuffle();
 public:
-	Deck(std::array<int, 52> cards);
 	Deck();
+	Deck(std::array<int, 52> cards);
 	void reset();
 	std::pair<Suit, Value> drawCard();
 };

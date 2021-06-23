@@ -4,18 +4,48 @@
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="texas-holdem.cpp" />
-    <ClCompile Include="deck.cpp" />
-    <ClCompile Include="player.cpp" />
-    <ClCompile Include="hand.cpp" />
+    <ClCompile Include="hand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="deck.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="texas-holdem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="texas-holdem.h" />
-    <ClInclude Include="deck.h" />
-    <ClInclude Include="player.h" />
-    <ClInclude Include="card.h" />
-    <ClInclude Include="hand.h" />
-    <ClInclude Include="agent.h" />
-    <ClInclude Include="decision.h" />
+    <ClInclude Include="agent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="card.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="decision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deck.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="texas-holdem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{1a2059f5-f5b2-484c-877e-f02e37376d97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{146ddd2f-9219-4ca1-b905-fa0c92ad93c0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

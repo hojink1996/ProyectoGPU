@@ -17,7 +17,7 @@ Deck::Deck()
 {
 	this->currentPosition = 0;
 	this->cards.fill(1);
-	this->cardOrder = std::array<std::pair<Suit, Value>, 52>();
+	this->cardOrder = std::array<std::pair<Suit, Value>, 52> {};
 	for (int index = 0; index < 52; ++index)
 		this->cardOrder[index] = std::make_pair(static_cast<Suit>(index % 13), static_cast<Value>(index / 13));
 }
