@@ -86,7 +86,9 @@
     <ClCompile Include="texas-holdem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="agent.h" />
     <ClInclude Include="card.h" />
+    <ClInclude Include="decision.h" />
     <ClInclude Include="deck.h" />
     <ClInclude Include="hand.h" />
     <ClInclude Include="player.h" />

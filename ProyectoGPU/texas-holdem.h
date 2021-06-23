@@ -13,7 +13,7 @@ private:
 	std::vector<Player> players;
 public:
 	TexasHoldem(int numPlayers, float startingStack);
-	TexasHoldem(int numPlayers, float startingStack, Deck deck);
+	TexasHoldem(int numPlayers, float startingStack, Deck& deck);
 	void resetDeck();
 	std::pair<Suit, Value> getNextCard();
 };

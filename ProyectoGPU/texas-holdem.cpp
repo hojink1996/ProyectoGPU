@@ -14,7 +14,7 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack)
 		this->players.push_back(Player(startingStack));
 }
 
-TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Deck deck)
+TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Deck& deck)
 {
 	this->dealerPosition = 0;
 	this->numPlayers = numPlayers;
@@ -32,3 +32,4 @@ std::pair<Suit, Value> TexasHoldem::getNextCard()
 {
 	return this->currentDeck.drawCard();
 }
+
