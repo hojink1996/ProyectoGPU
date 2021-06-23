@@ -15,3 +15,9 @@ std::array<std::pair<Suit, Value>, 2> Hand::getHand()
 {
 	return this->currentHand;
 }
+
+void Hand::resetHand()
+{
+	this->currentHand = { std::make_pair(Suit::Invalid, Value::Invalid),
+						 std::make_pair(Suit::Invalid, Value::Invalid)};
+}

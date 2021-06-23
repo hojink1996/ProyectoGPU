@@ -1,5 +1,8 @@
 #pragma once
 
+/*
+Used to represent the different possible suits of a card.
+*/
 enum class Suit
 {
 	Clubs,
@@ -9,6 +12,9 @@ enum class Suit
 	Invalid
 };
 
+/*
+Used to represent the different possible values of a card.
+*/
 enum class Value
 {
 	Ace,
