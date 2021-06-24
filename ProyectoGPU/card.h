@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 /*
 Used to represent the different possible suits of a card.
@@ -33,3 +34,4 @@ enum class Value
 	Invalid
 };
 
+typedef std::pair<Suit, Value> Card;

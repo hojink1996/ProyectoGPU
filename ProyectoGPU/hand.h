@@ -11,11 +11,11 @@ to the user.
 class Hand
 {
 private:
-	std::array<std::pair<Suit, Value>, 2> currentHand;
+	std::array<Card, 2> currentHand;
 public:
 	Hand();
-	void addCardToHand(std::pair<Suit, Value> card, int position);
-	std::array<std::pair<Suit, Value>, 2> getHand();
+	void addCardToHand(Card card, int position);
+	std::array<Card, 2> getHand();
 	void resetHand();
 };
 

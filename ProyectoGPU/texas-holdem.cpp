@@ -26,7 +26,7 @@ void TexasHoldem::resetDeck()
 	this->currentDeck.reset();
 }
 
-std::pair<Suit, Value> TexasHoldem::getNextCard()
+Card TexasHoldem::getNextCard()
 {
 	return this->currentDeck.drawCard();
 }

@@ -19,6 +19,7 @@ private:
 	int dealerPosition;
 	std::vector<Player> players;
 	std::pair<Suit, Value> getNextCard();
+	std::array<std::pair<Suit, Value>, 5> sharedCards;
 public:
 	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent);
 	TexasHoldem(int numPlayers, float startingStack, Deck& deck, Agent& decisionAgent);

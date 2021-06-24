@@ -16,8 +16,8 @@ public:
 	{
 		// Make a band new card and draw the first card (should be the ace of clubs)
 		Deck testDeck = Deck();
-		std::pair<Suit, Value> firstCard = testDeck.drawCard();
-		std::pair<Suit, Value> expectedCard = std::make_pair(Suit::Clubs, Value::Ace);
+		Card firstCard = testDeck.drawCard();
+		Card expectedCard = std::make_pair(Suit::Clubs, Value::Ace);
 
 		// Verify that we got the expected card
 		Assert::AreEqual(static_cast<int>(expectedCard.first), static_cast<int>(firstCard.first));
@@ -28,8 +28,8 @@ public:
 	{
 		// Make a brand new deck of cards and draw two cards
 		Deck testDeck = Deck();
-		std::pair<Suit, Value> firstCard = testDeck.drawCard();
-		std::pair<Suit, Value> secondCard = testDeck.drawCard();
+		Card firstCard = testDeck.drawCard();
+		Card secondCard = testDeck.drawCard();
 
 		// Get the output value for the card
 		int firstValue = 13 * static_cast<int>(firstCard.first) + static_cast<int>(firstCard.second);
@@ -46,7 +46,7 @@ public:
 		testDeck.reset();
 
 		// Draw the first card
-		std::pair<Suit, Value> firstCard = testDeck.drawCard();
+		Card firstCard = testDeck.drawCard();
 
 		// Compare with the first card in an initially unshuffled deck (note that this test
 		// may fail 1/52th of the time)
@@ -63,7 +63,7 @@ public:
 	{
 		// Create a hand and verify that we have the default values during creation (invalid cards)
 		Hand hand = Hand();
-		std::array<std::pair<Suit, Value>, 2> initialCards = hand.getHand();
+		std::array<Card, 2> initialCards = hand.getHand();
 		Suit invalidSuit = Suit::Invalid;
 		Value invalidValue = Value::Invalid;
 
@@ -81,8 +81,8 @@ public:
 		deck.reset();
 
 		// Draw the two cards
-		std::pair<Suit, Value> firstCard = deck.drawCard();
-		std::pair<Suit, Value> secondCard = deck.drawCard();
+		Card firstCard = deck.drawCard();
+		Card secondCard = deck.drawCard();
 
 		// Add the cards to the hand
 		hand.addCardToHand(firstCard, 0);

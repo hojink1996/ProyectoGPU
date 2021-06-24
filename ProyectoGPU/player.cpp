@@ -6,7 +6,7 @@ Player::Player(float startingStack, Agent& decisionAgent) : decisionAgent(decisi
 	this->stack = startingStack;
 }
 
-void Player::addCardToHand(std::pair<Suit, Value> card, int position)
+void Player::addCardToHand(Card card, int position)
 {
 	this->hand.addCardToHand(card, position);
 }
