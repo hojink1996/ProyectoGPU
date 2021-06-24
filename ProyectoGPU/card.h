@@ -35,3 +35,4 @@ enum class Value
 };
 
 typedef std::pair<Suit, Value> Card;
+constexpr Card invalidCard{ std::make_pair(Suit::Invalid, Value::Invalid) };

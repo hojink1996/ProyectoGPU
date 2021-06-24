@@ -30,7 +30,7 @@ Card Deck::drawCard()
 		return this->cardOrder[this->currentPosition++];
 	}
 	else
-		return std::make_pair(Suit::Invalid, Value::Invalid);
+		return invalidCard;
 }
 
 void Deck::shuffle()

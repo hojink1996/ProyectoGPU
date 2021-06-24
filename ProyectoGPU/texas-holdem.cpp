@@ -8,6 +8,7 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAge
 {
 	this->dealerPosition = 0;
 	this->numPlayers = numPlayers;
+	this->sharedCards = { invalidCard, invalidCard, invalidCard, invalidCard, invalidCard };
 	this->players = std::vector<Player>();
 	for (int i = 0; i < numPlayers; ++i)
 		this->players.push_back(Player(startingStack, decisionAgent));
@@ -17,6 +18,7 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Deck& deck, Agent&
 {
 	this->dealerPosition = 0;
 	this->numPlayers = numPlayers;
+	this->sharedCards = { invalidCard, invalidCard, invalidCard, invalidCard, invalidCard };
 	for (int i = 0; i < numPlayers; ++i)
 		this->players.push_back(Player(startingStack, decisionAgent));
 }
