@@ -17,7 +17,6 @@ private:
 	Agent& decisionAgent;
 public:
 	Player(float startingStack, Agent& decisionAgent);
-	Player(float startingStack);
 	void addCardToHand(std::pair<Suit, Value> card, int position);
 	void resetHand();
 };

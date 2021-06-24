@@ -80,6 +80,7 @@
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="agent.cpp" />
     <ClCompile Include="deck.cpp" />
     <ClCompile Include="hand.cpp" />
     <ClCompile Include="player.cpp" />

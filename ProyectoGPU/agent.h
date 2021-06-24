@@ -12,5 +12,13 @@ class Agent
 {
 private:
 public:
-	virtual Decision makeDecision() = 0;
+	virtual Decision makeDecision(float maxBet) = 0;
+};
+
+class RandomAgent : public Agent
+{
+private:
+public:
+	RandomAgent();
+	Decision makeDecision(float maxBet);
 };

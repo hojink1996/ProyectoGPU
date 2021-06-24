@@ -16,6 +16,9 @@
     <ClCompile Include="texas-holdem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="agent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="agent.h">
