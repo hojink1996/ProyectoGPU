@@ -19,6 +19,12 @@
     <ClCompile Include="agent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="straight-identifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="card.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="agent.h">
@@ -40,6 +46,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="texas-holdem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="straight-identifier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

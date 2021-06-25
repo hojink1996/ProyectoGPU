@@ -4,6 +4,7 @@
 #include "player.h"
 #include "card.h"
 #include "agent.h"
+#include "straight-identifier.h"
 
 /*
 The different types of combinations that a hand + shared card combination can return in
@@ -34,12 +35,21 @@ class TexasHoldem
 {
 private:
 	Deck& currentDeck;
+	StraightIdentifier& straightIdentifier;
 	int numPlayers;
 	int dealerPosition;
 	std::vector<Player> players;
 	std::pair<Suit, Value> getNextCard();
 	std::array<Card, 5> sharedCards;
-	bool isRoyalFlush(Hand& hand);
+	void resetDeck();
+	void resetSharedCards();
+	void resetPlayerCards();
+	void endRound();
+	void dealCards();
+	void drawFlop();
+	void drawTurn();
+	void drawRiver();
+	bool isRoyalFlush(const std::vector<Value>& filteredBySuitAndOrdered);
 	bool isStraightFlush(Hand& hand);
 	bool isFourOfAKind(Hand& hand);
 	bool isFullHouse(Hand& hand);
@@ -49,9 +59,8 @@ private:
 	bool isTwoPair(Hand& hand);
 	bool isPair(Hand& hand);
 public:
-	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent);
-	TexasHoldem(int numPlayers, float startingStack, Deck& deck, Agent& decisionAgent);
-	void resetDeck();
+	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier);
 	HandValue evaluateHand(Hand& hand);
+	void setSharedCards(std::array<Card, 5>& sharedCards);
 };
 

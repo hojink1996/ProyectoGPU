@@ -4,8 +4,18 @@
 #include "../ProyectoGPU/deck.h"
 #include "../ProyectoGPU/deck.cpp"
 #include "../ProyectoGPU/card.h"
+#include "../ProyectoGPU/card.cpp"
 #include "../ProyectoGPU/hand.h"
 #include "../ProyectoGPU/hand.cpp"
+#include "../ProyectoGPU/player.h"
+#include "../ProyectoGPU/player.cpp"
+#include "../ProyectoGPU/straight-identifier.h"
+#include "../ProyectoGPU/straight-identifier.cpp"
+#include "../ProyectoGPU/texas-holdem.h"
+#include "../ProyectoGPU/texas-holdem.cpp"
+#include "../ProyectoGPU/agent.h"
+#include "../ProyectoGPU/agent.cpp"
+
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -106,5 +116,65 @@ public:
 		Assert::AreEqual(static_cast<int>(invalidValue), static_cast<int>(hand.getHand()[0].second));
 		Assert::AreEqual(static_cast<int>(invalidSuit), static_cast<int>(hand.getHand()[1].first));
 		Assert::AreEqual(static_cast<int>(invalidValue), static_cast<int>(hand.getHand()[1].second));
+	}
+};
+
+TEST_CLASS(TestStraightIdentifier)
+{
+public:
+	TEST_METHOD(TestRoyalFlush)
+	{
+		// Create two positive and negative examples
+		StraightIdentifier straightIdentifier = StraightIdentifier();
+		std::vector<Value> basicRoyalStraight{ Value::Ace, Value::Ten, Value::Jack, Value::Queen, Value::King };
+		std::vector<Value> royalStraightWithExtra{ Value::Ace, Value::Five, Value::Ten, Value::Jack, Value::Queen, Value::King };
+		std::vector<Value> notRoyalStraight{ Value::Ace, Value::Five, Value::Ten, Value::Jack, Value::Queen};
+		std::vector<Value> isStraightButNotRoyalStraight{ Value::Ace, Value::Two, Value::Three, Value::Four, Value::Five };
+
+		// Check the output
+		Assert::IsTrue(straightIdentifier.hasRoyalStraight(basicRoyalStraight));
+		Assert::IsTrue(straightIdentifier.hasRoyalStraight(royalStraightWithExtra));
+		Assert::IsFalse(straightIdentifier.hasRoyalStraight(notRoyalStraight));
+		Assert::IsFalse(straightIdentifier.hasRoyalStraight(isStraightButNotRoyalStraight));
+	}
+};
+
+TEST_CLASS(TestTexasHoldemGame)
+{
+public:
+	TEST_METHOD(TestRoyalFlushValidation)
+	{
+		// Create a game of TexasHoldem
+		RandomAgent decisionAgent = RandomAgent();
+		Deck deck = Deck();
+		StraightIdentifier straightIdentifier = StraightIdentifier();
+		TexasHoldem texasHoldemGame = TexasHoldem(1, 100.0f, decisionAgent, deck, straightIdentifier);
+
+		// Set the cards in the shared card
+		std::array<Card, 5> sharedCard{ std::make_pair(Suit::Clubs, Value::Ace), std::make_pair(Suit::Clubs, Value::Ten),
+										 std::make_pair(Suit::Diamonds, Value::Ace), std::make_pair(Suit::Clubs, Value::King),
+										 std::make_pair(Suit::Hearts, Value::Five) };
+		std::array<Card, 5> sharedCardNotRoyal{ std::make_pair(Suit::Clubs, Value::Five), std::make_pair(Suit::Clubs, Value::Three),
+												std::make_pair(Suit::Diamonds, Value::Ace), std::make_pair(Suit::Clubs, Value::King),
+												std::make_pair(Suit::Hearts, Value::Five) };
+		texasHoldemGame.setSharedCards(sharedCard);
+		
+		// Create the hand of cards
+		Hand hand = Hand();
+		Card firstCard = std::make_pair(Suit::Clubs, Value::Jack);
+		Card secondCard = std::make_pair(Suit::Clubs, Value::Queen);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Check the value we get from the game
+		HandValue handValue =  texasHoldemGame.evaluateHand(hand);
+
+		// Check that we get the expected value
+		Assert::AreEqual(static_cast<int>(HandValue::RoyalFlush), static_cast<int>(handValue));
+
+		// Change to the scenario that is not a royal flus
+		texasHoldemGame.setSharedCards(sharedCardNotRoyal);
+		handValue = texasHoldemGame.evaluateHand(hand);
+		Assert::AreEqual(static_cast<int>(HandValue::Flush), static_cast<int>(handValue));
 	}
 };
