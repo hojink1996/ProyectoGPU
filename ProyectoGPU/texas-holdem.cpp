@@ -74,6 +74,125 @@ bool TexasHoldem::isRoyalFlush(const std::vector<Value>& filteredBySuitAndOrdere
 	return this->straightIdentifier.hasRoyalStraight(filteredBySuitAndOrdered);
 }
 
+bool TexasHoldem::isStraightFlush(const std::vector<Value>& filteredBySuitAndOrdered)
+{
+	return this->straightIdentifier.hasStraightFlush(filteredBySuitAndOrdered);
+}
+
+bool TexasHoldem::isStraight(const std::vector<Value>& orderedCards)
+{
+	return this->straightIdentifier.hasStraight(orderedCards);
+}
+
+bool TexasHoldem::isFourOfAKind(const std::vector<Value>& orderedCards)
+{
+	int currentLength = 0;
+	Value currentCardValue = Value::Invalid;
+	for (int currentCard = 0; currentCard < orderedCards.size(); ++currentCard)
+	{
+		if (currentCardValue == orderedCards[currentCard])
+			++currentLength;
+		else
+		{
+			currentLength = 0;
+			currentCardValue = orderedCards[currentCard];
+		}
+		if (currentLength >= 4)
+			return true;
+	}
+	return false;
+}
+
+bool TexasHoldem::isFullHouse(const std::vector<Value>& orderedCards)
+{
+	int currentLength = 0;
+	bool hasThreeOfAKind = false;
+	bool hasPair = false;
+	Value currentCardValue = Value::Invalid;
+	for (int currentCard = 0; currentCard < orderedCards.size(); ++currentCard)
+	{
+		if (currentCardValue == orderedCards[currentCard])
+			++currentLength;
+		else
+		{
+			if (currentLength >= 3 && !hasThreeOfAKind)
+				hasThreeOfAKind = true;
+			else if (currentLength >= 2)
+				hasPair = true;
+			currentLength = 0;
+			currentCardValue = orderedCards[currentCard];
+		}
+	}
+	if (currentLength >= 3 && !hasThreeOfAKind)
+		hasThreeOfAKind = true;
+	else if (currentLength >= 2)
+		hasPair = true;
+	return hasThreeOfAKind && hasPair;
+}
+
+bool TexasHoldem::isThreeOfAKind(const std::vector<Value>& orderedCards)
+{
+	int currentLength = 0;
+	Value currentCardValue = Value::Invalid;
+	for (int currentCard = 0; currentCard < orderedCards.size(); ++currentCard)
+	{
+		if (currentCardValue == orderedCards[currentCard])
+			++currentLength;
+		else
+		{
+			if (currentLength >= 3)
+				return true;
+			else
+			{
+				currentLength = 0;
+				currentCardValue = orderedCards[currentCard];
+			}
+		}
+	}
+	return currentLength >= 3;
+}
+
+bool TexasHoldem::isTwoPair(const std::vector<Value>& orderedCards)
+{
+	int currentLength = 0;
+	bool previousPair = false;
+	Value currentCardValue = Value::Invalid;
+	for (int currentCard = 0; currentCard < orderedCards.size(); ++currentCard)
+	{
+		if (currentCardValue == orderedCards[currentCard])
+			++currentLength;
+		else
+		{
+			if ((currentLength >= 2) && previousPair)
+				return true;
+			else if (currentLength >= 2)
+				previousPair = true;
+			currentLength = 0;
+			currentCardValue = orderedCards[currentCard];
+		}
+	}
+	return ((currentLength >= 2) && previousPair);
+}
+
+bool TexasHoldem::isPair(const std::vector<Value>& orderedCards)
+{
+	int currentLength = 0;
+	Value currentCardValue = Value::Invalid;
+	for (int currentCard = 0; currentCard < orderedCards.size(); ++currentCard)
+	{
+		if (currentCardValue == orderedCards[currentCard])
+			++currentLength;
+		else
+		{
+			if (currentLength >= 2)
+				return true;
+			currentLength = 0;
+			currentCardValue = orderedCards[currentCard];
+		}
+	}
+	return (currentLength >= 2);
+}
+
 void TexasHoldem::setSharedCards(std::array<Card, 5>& sharedCards)
 {
 	this->sharedCards = sharedCards;
@@ -83,6 +202,7 @@ HandValue TexasHoldem::evaluateHand(Hand& hand)
 {
 	// Vectors to save the list of ordered cards for each suit
 	std::vector<std::vector<Value>> filteredBySuitAndOrdered{ {} , {}, {}, {} };
+	std::vector<Value> orderedByValue{};
 
 	// Loop over the hand and the shared cards and filter them by suit
 	for (auto card : hand.getHand())
@@ -91,6 +211,7 @@ HandValue TexasHoldem::evaluateHand(Hand& hand)
 			return HandValue::Invalid;
 		int index = static_cast<int>(card.first);
 		filteredBySuitAndOrdered[index].push_back(card.second);
+		orderedByValue.push_back(card.second);
 	}
 	for (auto card : this->sharedCards)
 	{
@@ -98,6 +219,7 @@ HandValue TexasHoldem::evaluateHand(Hand& hand)
 			return HandValue::Invalid;
 		int index = static_cast<int>(card.first);
 		filteredBySuitAndOrdered[index].push_back(card.second);
+		orderedByValue.push_back(card.second);
 	}
 
 	// Check if any of the vectors has 5 or more elements
@@ -119,9 +241,26 @@ HandValue TexasHoldem::evaluateHand(Hand& hand)
 		std::sort(possibleStraightFlushValues.begin(), possibleStraightFlushValues.end(), CardEvaluation::orderCardValue);
 		if (this->isRoyalFlush(possibleStraightFlushValues))
 			return HandValue::RoyalFlush;
+		if (this->isStraightFlush(possibleStraightFlushValues))
+			return HandValue::StraightFlush;
 
 		return HandValue::Flush;
 	}
+	
+	// Order the vector by it's value
+	std::sort(orderedByValue.begin(), orderedByValue.end(), CardEvaluation::orderCardValue);
+	if (this->isFourOfAKind(orderedByValue))
+		return HandValue::FourOfAKind;
+	if (this->isFullHouse(orderedByValue))
+		return HandValue::FullHouse;
+	if (this->isStraight(orderedByValue))
+		return HandValue::Straight;
+	if (this->isThreeOfAKind(orderedByValue))
+		return HandValue::ThreeOfAKind;
+	if (this->isTwoPair(orderedByValue))
+		return HandValue::TwoPair;
+	if (this->isPair(orderedByValue))
+		return HandValue::Pair;
 
-	return HandValue::Invalid;
+	return HandValue::HighCard;
 }

@@ -137,6 +137,23 @@ public:
 		Assert::IsFalse(straightIdentifier.hasRoyalStraight(notRoyalStraight));
 		Assert::IsFalse(straightIdentifier.hasRoyalStraight(isStraightButNotRoyalStraight));
 	}
+
+	TEST_METHOD(TestStraightFlush)
+	{
+		StraightIdentifier straightIdentifier = StraightIdentifier();
+		std::vector<Value> basicStraight{ Value::Ace, Value::Two, Value::Three, Value::Four, Value::Five };
+		std::vector<Value> simpleMixedStraight{ Value::Ace, Value::Five, Value::Six, Value::Seven, Value::Eight, Value::Nine };
+		std::vector<Value> mixedStraight{ Value::Ace, Value::Two, Value::Five, Value::Six, Value::Seven, Value::Eight, Value::Nine };
+		std::vector<Value> notStraight{ Value::Ace, Value::Two, Value::Three, Value::Four, Value::Queen, Value::King };
+		std::vector<Value> notStraightThrees{ Value::Three, Value::Four, Value::Five, Value::Ten, Value::Jack, Value::Queen };
+
+		// Check the output
+		Assert::IsTrue(straightIdentifier.hasStraightFlush(basicStraight));
+		Assert::IsTrue(straightIdentifier.hasStraightFlush(simpleMixedStraight));
+		Assert::IsTrue(straightIdentifier.hasStraightFlush(mixedStraight));
+		Assert::IsFalse(straightIdentifier.hasStraightFlush(notStraight));
+		Assert::IsFalse(straightIdentifier.hasStraightFlush(notStraightThrees));
+	}
 };
 
 TEST_CLASS(TestTexasHoldemGame)
@@ -176,5 +193,39 @@ public:
 		texasHoldemGame.setSharedCards(sharedCardNotRoyal);
 		handValue = texasHoldemGame.evaluateHand(hand);
 		Assert::AreEqual(static_cast<int>(HandValue::Flush), static_cast<int>(handValue));
+	}
+	TEST_METHOD(TestStraghtFlush)
+	{
+		// Create a game of TexasHoldem
+		RandomAgent decisionAgent = RandomAgent();
+		Deck deck = Deck();
+		StraightIdentifier straightIdentifier = StraightIdentifier();
+		TexasHoldem texasHoldemGame = TexasHoldem(1, 100.0f, decisionAgent, deck, straightIdentifier);
+
+		// Set the shared cards
+		std::array<Card, 5> sharedCards{ std::make_pair(Suit::Diamonds, Value::Five), std::make_pair(Suit::Diamonds, Value::Nine),
+										 std::make_pair(Suit::Diamonds, Value::Ace), std::make_pair(Suit::Diamonds, Value::Six),
+										 std::make_pair(Suit::Hearts, Value::Five) };
+
+		// Create the hand of cards
+		Hand hand = Hand();
+		Card firstCard = std::make_pair(Suit::Diamonds, Value::Seven);
+		Card secondCard = std::make_pair(Suit::Diamonds, Value::Eight);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Check the value from the game
+		texasHoldemGame.setSharedCards(sharedCards);
+		HandValue handValue = texasHoldemGame.evaluateHand(hand);
+		Assert::AreEqual(static_cast<int>(HandValue::StraightFlush), static_cast<int>(handValue));
+		hand.resetHand();
+
+		// Check the case for an incorrect hand
+		firstCard = std::make_pair(Suit::Clubs, Value::Seven);
+		secondCard = std::make_pair(Suit::Clubs, Value::Eight);
+
+		// Check that we don't get a straight flush in this case
+		handValue = texasHoldemGame.evaluateHand(hand);
+		Assert::AreNotEqual(static_cast<int>(HandValue::StraightFlush), static_cast<int>(handValue));
 	}
 };

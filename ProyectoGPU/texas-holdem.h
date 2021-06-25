@@ -50,14 +50,13 @@ private:
 	void drawTurn();
 	void drawRiver();
 	bool isRoyalFlush(const std::vector<Value>& filteredBySuitAndOrdered);
-	bool isStraightFlush(Hand& hand);
-	bool isFourOfAKind(Hand& hand);
-	bool isFullHouse(Hand& hand);
-	bool isFlush(Hand& hand);
-	bool isStraight(Hand& hand);
-	bool isThreeOfAKind(Hand& hand);
-	bool isTwoPair(Hand& hand);
-	bool isPair(Hand& hand);
+	bool isStraightFlush(const std::vector<Value>& filteredBySuitAndOrdered);
+	bool isFourOfAKind(const std::vector<Value>& orderedCards);
+	bool isFullHouse(const std::vector<Value>& orderedCards);
+	bool isStraight(const std::vector<Value>& orderedCards);
+	bool isThreeOfAKind(const std::vector<Value>& orderedCards);
+	bool isTwoPair(const std::vector<Value>& orderedCards);
+	bool isPair(const std::vector<Value>& orderedCards);
 public:
 	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier);
 	HandValue evaluateHand(Hand& hand);
