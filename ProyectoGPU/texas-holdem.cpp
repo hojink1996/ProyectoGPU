@@ -87,14 +87,14 @@ bool TexasHoldem::isStraight(const std::vector<Value>& orderedCards)
 bool TexasHoldem::isFourOfAKind(const std::vector<Value>& orderedCards)
 {
 	int currentLength = 0;
-	Value currentCardValue = Value::Invalid;
+	Value currentCardValue = orderedCards[0];
 	for (int currentCard = 0; currentCard < orderedCards.size(); ++currentCard)
 	{
 		if (currentCardValue == orderedCards[currentCard])
 			++currentLength;
 		else
 		{
-			currentLength = 0;
+			currentLength = 1;
 			currentCardValue = orderedCards[currentCard];
 		}
 		if (currentLength >= 4)
@@ -108,7 +108,7 @@ bool TexasHoldem::isFullHouse(const std::vector<Value>& orderedCards)
 	int currentLength = 0;
 	bool hasThreeOfAKind = false;
 	bool hasPair = false;
-	Value currentCardValue = Value::Invalid;
+	Value currentCardValue = orderedCards[0];
 	for (int currentCard = 0; currentCard < orderedCards.size(); ++currentCard)
 	{
 		if (currentCardValue == orderedCards[currentCard])
@@ -119,7 +119,7 @@ bool TexasHoldem::isFullHouse(const std::vector<Value>& orderedCards)
 				hasThreeOfAKind = true;
 			else if (currentLength >= 2)
 				hasPair = true;
-			currentLength = 0;
+			currentLength = 1;
 			currentCardValue = orderedCards[currentCard];
 		}
 	}
@@ -133,7 +133,7 @@ bool TexasHoldem::isFullHouse(const std::vector<Value>& orderedCards)
 bool TexasHoldem::isThreeOfAKind(const std::vector<Value>& orderedCards)
 {
 	int currentLength = 0;
-	Value currentCardValue = Value::Invalid;
+	Value currentCardValue = orderedCards[0];
 	for (int currentCard = 0; currentCard < orderedCards.size(); ++currentCard)
 	{
 		if (currentCardValue == orderedCards[currentCard])
@@ -144,7 +144,7 @@ bool TexasHoldem::isThreeOfAKind(const std::vector<Value>& orderedCards)
 				return true;
 			else
 			{
-				currentLength = 0;
+				currentLength = 1;
 				currentCardValue = orderedCards[currentCard];
 			}
 		}
@@ -156,7 +156,7 @@ bool TexasHoldem::isTwoPair(const std::vector<Value>& orderedCards)
 {
 	int currentLength = 0;
 	bool previousPair = false;
-	Value currentCardValue = Value::Invalid;
+	Value currentCardValue = orderedCards[0];
 	for (int currentCard = 0; currentCard < orderedCards.size(); ++currentCard)
 	{
 		if (currentCardValue == orderedCards[currentCard])
@@ -167,7 +167,7 @@ bool TexasHoldem::isTwoPair(const std::vector<Value>& orderedCards)
 				return true;
 			else if (currentLength >= 2)
 				previousPair = true;
-			currentLength = 0;
+			currentLength = 1;
 			currentCardValue = orderedCards[currentCard];
 		}
 	}
@@ -177,7 +177,7 @@ bool TexasHoldem::isTwoPair(const std::vector<Value>& orderedCards)
 bool TexasHoldem::isPair(const std::vector<Value>& orderedCards)
 {
 	int currentLength = 0;
-	Value currentCardValue = Value::Invalid;
+	Value currentCardValue = orderedCards[0];
 	for (int currentCard = 0; currentCard < orderedCards.size(); ++currentCard)
 	{
 		if (currentCardValue == orderedCards[currentCard])
@@ -186,7 +186,7 @@ bool TexasHoldem::isPair(const std::vector<Value>& orderedCards)
 		{
 			if (currentLength >= 2)
 				return true;
-			currentLength = 0;
+			currentLength = 1;
 			currentCardValue = orderedCards[currentCard];
 		}
 	}

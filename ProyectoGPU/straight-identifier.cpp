@@ -16,6 +16,7 @@ void StraightIdentifier::reset()
 
 bool StraightIdentifier::hasStraight(const std::vector<Value>& orderedByValue)
 {
+	this->reset();
 	bool startsWithAce = (orderedByValue[0] == Value::Ace);
 	// Loop over the values and only update if we use the same card as before
 	for (int currentCard = 0; currentCard < orderedByValue.size(); ++currentCard)
@@ -33,7 +34,7 @@ bool StraightIdentifier::hasStraight(const std::vector<Value>& orderedByValue)
 		{
 			if (maxLength >= 5)
 				return true;
-			this->maxLength = 0;
+			this->maxLength = 1;
 			this->currentValue = currentValue;
 			this->nextValue = static_cast<Value>((static_cast<int>(currentValue) + 1) % 13);
 		}
@@ -47,6 +48,7 @@ bool StraightIdentifier::hasStraight(const std::vector<Value>& orderedByValue)
 
 bool StraightIdentifier::hasRoyalStraight(const std::vector<Value>& filteredBySuitAndOrdered)
 {
+	this->reset();
 	// Loop over all the values with the same suit
 	for (int currentCard = 0; currentCard < filteredBySuitAndOrdered.size(); ++currentCard)
 	{
@@ -75,6 +77,7 @@ bool StraightIdentifier::hasRoyalStraight(const std::vector<Value>& filteredBySu
 
 bool StraightIdentifier::hasStraightFlush(const std::vector<Value>& filteredBySuitAndOrdered)
 {
+	this->reset();
 	// Loop over the cards in the vector
 	for (int currentCard = 0; currentCard < filteredBySuitAndOrdered.size(); ++currentCard)
 	{

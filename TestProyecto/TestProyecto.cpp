@@ -228,4 +228,360 @@ public:
 		handValue = texasHoldemGame.evaluateHand(hand);
 		Assert::AreNotEqual(static_cast<int>(HandValue::StraightFlush), static_cast<int>(handValue));
 	}
+
+	TEST_METHOD(TestFourOfAKind)
+	{
+		// Create a game of TexasHoldem
+		RandomAgent decisionAgent = RandomAgent();
+		Deck deck = Deck();
+		StraightIdentifier straightIdentifier = StraightIdentifier();
+		TexasHoldem texasHoldemGame = TexasHoldem(1, 100.0f, decisionAgent, deck, straightIdentifier);
+
+		// Set the shared cards
+		std::array<Card, 5> sharedCards{ std::make_pair(Suit::Diamonds, Value::Five), std::make_pair(Suit::Diamonds, Value::Nine),
+										 std::make_pair(Suit::Clubs, Value::Five), std::make_pair(Suit::Diamonds, Value::Six),
+										 std::make_pair(Suit::Hearts, Value::Five) };
+		texasHoldemGame.setSharedCards(sharedCards);
+
+		// Create the hand of cards
+		Hand hand = Hand();
+		Card firstCard = std::make_pair(Suit::Spades, Value::Five);
+		Card secondCard = std::make_pair(Suit::Spades, Value::Seven);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Check that we get the desired output
+		Assert::AreEqual(static_cast<int>(HandValue::FourOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Change the hand to not have a four of a kind
+		firstCard = std::make_pair(Suit::Hearts, Value::Nine);
+		hand.addCardToHand(firstCard, 0);
+		Assert::AreNotEqual(static_cast<int>(HandValue::FourOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Check the case when we have a non smallest value four of a kind
+		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::Five), std::make_pair(Suit::Diamonds, Value::Nine),
+										 std::make_pair(Suit::Clubs, Value::Nine), std::make_pair(Suit::Diamonds, Value::Six),
+										 std::make_pair(Suit::Hearts, Value::Five) };
+		texasHoldemGame.setSharedCards(sharedCardsNew);
+		firstCard = std::make_pair(Suit::Spades, Value::Nine);
+		secondCard = std::make_pair(Suit::Hearts, Value::Nine);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		Assert::AreEqual(static_cast<int>(HandValue::FourOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+	}
+
+	TEST_METHOD(TestFullHouse)
+	{
+		// Create a game of TexasHoldem
+		RandomAgent decisionAgent = RandomAgent();
+		Deck deck = Deck();
+		StraightIdentifier straightIdentifier = StraightIdentifier();
+		TexasHoldem texasHoldemGame = TexasHoldem(1, 100.0f, decisionAgent, deck, straightIdentifier);
+
+		// Set the shared cards
+		std::array<Card, 5> sharedCards{ std::make_pair(Suit::Diamonds, Value::Five), std::make_pair(Suit::Diamonds, Value::Nine),
+										 std::make_pair(Suit::Clubs, Value::Five), std::make_pair(Suit::Diamonds, Value::Six),
+										 std::make_pair(Suit::Hearts, Value::Five) };
+		texasHoldemGame.setSharedCards(sharedCards);
+
+		// Create the hand of cards
+		Hand hand = Hand();
+		Card firstCard = std::make_pair(Suit::Diamonds, Value::Nine);
+		Card secondCard = std::make_pair(Suit::Spades, Value::Seven);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Check that we get the desired output
+		Assert::AreEqual(static_cast<int>(HandValue::FullHouse), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Change it so that there is no longer a Full House
+		firstCard = std::make_pair(Suit::Diamonds, Value::Eight);
+		hand.addCardToHand(firstCard, 0);
+		Assert::AreNotEqual(static_cast<int>(HandValue::FullHouse), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Add another Full House in a more complicated hand
+		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::Five), std::make_pair(Suit::Diamonds, Value::Nine),
+										 std::make_pair(Suit::Clubs, Value::Eight), std::make_pair(Suit::Hearts, Value::Five),
+										 std::make_pair(Suit::Hearts, Value::Eight) };
+		texasHoldemGame.setSharedCards(sharedCardsNew);
+
+		// Change the cards held in the hand
+		firstCard = std::make_pair(Suit::Clubs, Value::Five);
+		secondCard = std::make_pair(Suit::Hearts, Value::Eight);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Verify that the output is a full house
+		Assert::AreEqual(static_cast<int>(HandValue::FullHouse), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+	}
+
+	TEST_METHOD(TestFlush)
+	{
+		// Create a game of TexasHoldem
+		RandomAgent decisionAgent = RandomAgent();
+		Deck deck = Deck();
+		StraightIdentifier straightIdentifier = StraightIdentifier();
+		TexasHoldem texasHoldemGame = TexasHoldem(1, 100.0f, decisionAgent, deck, straightIdentifier);
+
+		// Set the shared cards
+		std::array<Card, 5> sharedCards{ std::make_pair(Suit::Diamonds, Value::Five), std::make_pair(Suit::Diamonds, Value::Nine),
+										 std::make_pair(Suit::Clubs, Value::Five), std::make_pair(Suit::Diamonds, Value::Six),
+										 std::make_pair(Suit::Hearts, Value::Five) };
+		texasHoldemGame.setSharedCards(sharedCards);
+
+		// Create the hand of cards
+		Hand hand = Hand();
+		Card firstCard = std::make_pair(Suit::Diamonds, Value::Queen);
+		Card secondCard = std::make_pair(Suit::Diamonds, Value::Ace);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Check that we get the desired output
+		Assert::AreEqual(static_cast<int>(HandValue::Flush), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Change it so that there is no longer a Full House
+		firstCard = std::make_pair(Suit::Clubs, Value::Eight);
+		hand.addCardToHand(firstCard, 0);
+		Assert::AreNotEqual(static_cast<int>(HandValue::Flush), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Add another Full House in a more complicated hand
+		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::Ace), std::make_pair(Suit::Diamonds, Value::Queen),
+										 std::make_pair(Suit::Diamonds, Value::Eight), std::make_pair(Suit::Hearts, Value::Five),
+										 std::make_pair(Suit::Hearts, Value::Seven) };
+		texasHoldemGame.setSharedCards(sharedCardsNew);
+
+		// Change the cards held in the hand
+		firstCard = std::make_pair(Suit::Diamonds, Value::Jack);
+		secondCard = std::make_pair(Suit::Diamonds, Value::King);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Verify that the output is a full house
+		Assert::AreEqual(static_cast<int>(HandValue::Flush), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+	}
+	TEST_METHOD(TestStraight)
+	{
+		// Create a game of TexasHoldem
+		RandomAgent decisionAgent = RandomAgent();
+		Deck deck = Deck();
+		StraightIdentifier straightIdentifier = StraightIdentifier();
+		TexasHoldem texasHoldemGame = TexasHoldem(1, 100.0f, decisionAgent, deck, straightIdentifier);
+
+		// Set the shared cards
+		std::array<Card, 5> sharedCards{ std::make_pair(Suit::Diamonds, Value::Five), std::make_pair(Suit::Diamonds, Value::Nine),
+										 std::make_pair(Suit::Clubs, Value::Six), std::make_pair(Suit::Clubs, Value::Five),
+										 std::make_pair(Suit::Hearts, Value::Five) };
+		texasHoldemGame.setSharedCards(sharedCards);
+
+		// Create the hand of cards
+		Hand hand = Hand();
+		Card firstCard = std::make_pair(Suit::Diamonds, Value::Seven);
+		Card secondCard = std::make_pair(Suit::Diamonds, Value::Eight);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Check that we get the desired output
+		Assert::AreEqual(static_cast<int>(HandValue::Straight), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Change it so that there is no longer a Full House
+		firstCard = std::make_pair(Suit::Clubs, Value::Ace);
+		hand.addCardToHand(firstCard, 0);
+		Assert::AreNotEqual(static_cast<int>(HandValue::Flush), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Add another Full House in a more complicated hand
+		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::King), std::make_pair(Suit::Diamonds, Value::Queen),
+										 std::make_pair(Suit::Clubs, Value::Ace), std::make_pair(Suit::Spades, Value::Five),
+										 std::make_pair(Suit::Hearts, Value::Seven) };
+		texasHoldemGame.setSharedCards(sharedCardsNew);
+
+		// Change the cards held in the hand
+		firstCard = std::make_pair(Suit::Spades, Value::Jack);
+		secondCard = std::make_pair(Suit::Spades, Value::Ten);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Verify that the output is a full house
+		Assert::AreEqual(static_cast<int>(HandValue::Straight), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+	}
+
+	TEST_METHOD(TestThreeOfAKind)
+	{
+		// Create a game of TexasHoldem
+		RandomAgent decisionAgent = RandomAgent();
+		Deck deck = Deck();
+		StraightIdentifier straightIdentifier = StraightIdentifier();
+		TexasHoldem texasHoldemGame = TexasHoldem(1, 100.0f, decisionAgent, deck, straightIdentifier);
+
+		// Set the shared cards
+		std::array<Card, 5> sharedCards{ std::make_pair(Suit::Diamonds, Value::Ace), std::make_pair(Suit::Diamonds, Value::Five),
+										 std::make_pair(Suit::Clubs, Value::Six), std::make_pair(Suit::Clubs, Value::Nine),
+										 std::make_pair(Suit::Hearts, Value::Nine) };
+		texasHoldemGame.setSharedCards(sharedCards);
+
+		// Create the hand of cards
+		Hand hand = Hand();
+		Card firstCard = std::make_pair(Suit::Diamonds, Value::Nine);
+		Card secondCard = std::make_pair(Suit::Diamonds, Value::King);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Check that we get the desired output
+		Assert::AreEqual(static_cast<int>(HandValue::ThreeOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Change it so that there is no longer a Full House
+		firstCard = std::make_pair(Suit::Clubs, Value::Ace);
+		hand.addCardToHand(firstCard, 0);
+		Assert::AreNotEqual(static_cast<int>(HandValue::ThreeOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Add another Full House in a more complicated hand
+		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::King), std::make_pair(Suit::Diamonds, Value::Queen),
+										 std::make_pair(Suit::Clubs, Value::Ace), std::make_pair(Suit::Spades, Value::Five),
+										 std::make_pair(Suit::Hearts, Value::Seven) };
+		texasHoldemGame.setSharedCards(sharedCardsNew);
+
+		// Change the cards held in the hand
+		firstCard = std::make_pair(Suit::Spades, Value::King);
+		secondCard = std::make_pair(Suit::Clubs, Value::King);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Verify that the output is a full house
+		Assert::AreEqual(static_cast<int>(HandValue::ThreeOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+	}
+
+	TEST_METHOD(TestTwoPair)
+	{
+		// Create a game of TexasHoldem
+		RandomAgent decisionAgent = RandomAgent();
+		Deck deck = Deck();
+		StraightIdentifier straightIdentifier = StraightIdentifier();
+		TexasHoldem texasHoldemGame = TexasHoldem(1, 100.0f, decisionAgent, deck, straightIdentifier);
+
+		// Set the shared cards
+		std::array<Card, 5> sharedCards{ std::make_pair(Suit::Diamonds, Value::Ace), std::make_pair(Suit::Diamonds, Value::Five),
+										 std::make_pair(Suit::Clubs, Value::Six), std::make_pair(Suit::Clubs, Value::Nine),
+										 std::make_pair(Suit::Hearts, Value::Nine) };
+		texasHoldemGame.setSharedCards(sharedCards);
+
+		// Create the hand of cards
+		Hand hand = Hand();
+		Card firstCard = std::make_pair(Suit::Diamonds, Value::Six);
+		Card secondCard = std::make_pair(Suit::Diamonds, Value::King);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Check that we get the desired output
+		Assert::AreEqual(static_cast<int>(HandValue::TwoPair), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Change it so that there is no longer a Full House
+		firstCard = std::make_pair(Suit::Clubs, Value::Two);
+		hand.addCardToHand(firstCard, 0);
+		Assert::AreNotEqual(static_cast<int>(HandValue::TwoPair), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Add another Full House in a more complicated hand
+		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::King), std::make_pair(Suit::Clubs, Value::King),
+										 std::make_pair(Suit::Clubs, Value::Ace), std::make_pair(Suit::Spades, Value::Five),
+										 std::make_pair(Suit::Hearts, Value::Seven) };
+		texasHoldemGame.setSharedCards(sharedCardsNew);
+
+		// Change the cards held in the hand
+		firstCard = std::make_pair(Suit::Spades, Value::Nine);
+		secondCard = std::make_pair(Suit::Clubs, Value::Nine);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Verify that the output is a full house
+		Assert::AreEqual(static_cast<int>(HandValue::TwoPair), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+	}
+
+	TEST_METHOD(TestPair)
+	{
+		// Create a game of TexasHoldem
+		RandomAgent decisionAgent = RandomAgent();
+		Deck deck = Deck();
+		StraightIdentifier straightIdentifier = StraightIdentifier();
+		TexasHoldem texasHoldemGame = TexasHoldem(1, 100.0f, decisionAgent, deck, straightIdentifier);
+
+		// Set the shared cards
+		std::array<Card, 5> sharedCards{ std::make_pair(Suit::Diamonds, Value::Ace), std::make_pair(Suit::Diamonds, Value::Five),
+										 std::make_pair(Suit::Clubs, Value::Six), std::make_pair(Suit::Clubs, Value::Nine),
+										 std::make_pair(Suit::Hearts, Value::Jack) };
+		texasHoldemGame.setSharedCards(sharedCards);
+
+		// Create the hand of cards
+		Hand hand = Hand();
+		Card firstCard = std::make_pair(Suit::Diamonds, Value::Six);
+		Card secondCard = std::make_pair(Suit::Diamonds, Value::King);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Check that we get the desired output
+		Assert::AreEqual(static_cast<int>(HandValue::Pair), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Change it so that there is no longer a Full House
+		firstCard = std::make_pair(Suit::Clubs, Value::Two);
+		hand.addCardToHand(firstCard, 0);
+		Assert::AreNotEqual(static_cast<int>(HandValue::Pair), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Add another Full House in a more complicated hand
+		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::King), std::make_pair(Suit::Clubs, Value::Queen),
+										 std::make_pair(Suit::Clubs, Value::Ace), std::make_pair(Suit::Spades, Value::Five),
+										 std::make_pair(Suit::Hearts, Value::Seven) };
+		texasHoldemGame.setSharedCards(sharedCardsNew);
+
+		// Change the cards held in the hand
+		firstCard = std::make_pair(Suit::Spades, Value::Nine);
+		secondCard = std::make_pair(Suit::Clubs, Value::Nine);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Verify that the output is a full house
+		Assert::AreEqual(static_cast<int>(HandValue::Pair), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+	}
+
+    TEST_METHOD(TestHighCard)
+	{
+		// Create a game of TexasHoldem
+		RandomAgent decisionAgent = RandomAgent();
+		Deck deck = Deck();
+		StraightIdentifier straightIdentifier = StraightIdentifier();
+		TexasHoldem texasHoldemGame = TexasHoldem(1, 100.0f, decisionAgent, deck, straightIdentifier);
+
+		// Set the shared cards
+		std::array<Card, 5> sharedCards{ std::make_pair(Suit::Diamonds, Value::Ace), std::make_pair(Suit::Diamonds, Value::Five),
+										 std::make_pair(Suit::Clubs, Value::Six), std::make_pair(Suit::Clubs, Value::Nine),
+										 std::make_pair(Suit::Hearts, Value::Jack) };
+		texasHoldemGame.setSharedCards(sharedCards);
+
+		// Create the hand of cards
+		Hand hand = Hand();
+		Card firstCard = std::make_pair(Suit::Diamonds, Value::Eight);
+		Card secondCard = std::make_pair(Suit::Diamonds, Value::King);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Check that we get the desired output
+		Assert::AreEqual(static_cast<int>(HandValue::HighCard), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Change it so that there is no longer a Full House
+		secondCard = std::make_pair(Suit::Clubs, Value::Seven);
+		hand.addCardToHand(secondCard, 1);
+		Assert::AreNotEqual(static_cast<int>(HandValue::HighCard), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+
+		// Add another Full House in a more complicated hand
+		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::King), std::make_pair(Suit::Clubs, Value::Queen),
+										 std::make_pair(Suit::Clubs, Value::Ace), std::make_pair(Suit::Spades, Value::Eight),
+										 std::make_pair(Suit::Hearts, Value::Seven) };
+		texasHoldemGame.setSharedCards(sharedCardsNew);
+
+		// Change the cards held in the hand
+		firstCard = std::make_pair(Suit::Spades, Value::Jack);
+		secondCard = std::make_pair(Suit::Clubs, Value::Nine);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
+
+		// Verify that the output is a full house
+		Assert::AreEqual(static_cast<int>(HandValue::HighCard), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+	}
 };
