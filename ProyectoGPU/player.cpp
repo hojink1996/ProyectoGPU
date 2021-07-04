@@ -15,3 +15,8 @@ void Player::resetHand()
 {
 	this->hand.resetHand();
 }
+
+Hand Player::getHand()
+{
+	return this->hand;
+}

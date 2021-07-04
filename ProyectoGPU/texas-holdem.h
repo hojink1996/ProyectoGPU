@@ -26,6 +26,19 @@ enum class HandValue
 };
 
 /*
+We need to save the current Game State for the game. This makes it possible to determine the
+next step for the game.
+*/
+enum class GameState
+{
+	PreFlop,
+	Flop,
+	Turn,
+	River,
+	Invalid
+};
+
+/*
 The TexasHoldem Class is the main Class used to represent the game of Texas Hold'em
 used in the simulations. The class handles the interaction between the different players
 in the game, the deck and the bets they make. It also decides the winner after each round and
@@ -36,6 +49,7 @@ class TexasHoldem
 private:
 	Deck& currentDeck;
 	StraightIdentifier& straightIdentifier;
+	GameState currentGameState;
 	int numPlayers;
 	int dealerPosition;
 	std::vector<Player> players;
@@ -57,6 +71,7 @@ private:
 	bool isThreeOfAKind(const std::vector<Value>& orderedCards);
 	bool isTwoPair(const std::vector<Value>& orderedCards);
 	bool isPair(const std::vector<Value>& orderedCards);
+	int determineWinner();
 public:
 	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier);
 	HandValue evaluateHand(Hand& hand);
