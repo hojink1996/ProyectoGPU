@@ -8,6 +8,7 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAge
 	StraightIdentifier& straightIdentifier): currentDeck(deck), straightIdentifier(straightIdentifier)
 {
 	this->dealerPosition = 0;
+	this->currentGameState = GameState::Invalid;
 	this->numPlayers = numPlayers;
 	this->sharedCards = { invalidCard, invalidCard, invalidCard, invalidCard, invalidCard };
 	for (int i = 0; i < numPlayers; ++i)
@@ -26,6 +27,7 @@ Card TexasHoldem::getNextCard()
 
 void TexasHoldem::dealCards()
 {
+	this->currentGameState = GameState::PreFlop;
 	// We give 2 cards to each player
 	for (int cardNumber = 0; cardNumber < 2; ++cardNumber)
 	{
@@ -38,17 +40,20 @@ void TexasHoldem::dealCards()
 
 void TexasHoldem::drawFlop()
 {
+	this->currentGameState = GameState::Flop;
 	for (int cardNumber = 0; cardNumber < 3; ++cardNumber)
 		sharedCards[cardNumber] = this->getNextCard();
 }
 
 void TexasHoldem::drawTurn()
 {
+	this->currentGameState = GameState::Turn;
 	sharedCards[3] = this->getNextCard();
 }
 
 void TexasHoldem::drawRiver()
 {
+	this->currentGameState = GameState::River;
 	sharedCards[4] = this->getNextCard();
 }
 
@@ -68,6 +73,7 @@ void TexasHoldem::endRound()
 	this->resetDeck();
 	this->resetPlayerCards();
 	this->resetSharedCards();
+	GameState::Invalid;
 }
 
 bool TexasHoldem::isRoyalFlush(const std::vector<Value>& filteredBySuitAndOrdered)
@@ -197,6 +203,25 @@ bool TexasHoldem::isPair(const std::vector<Value>& orderedCards)
 void TexasHoldem::setSharedCards(std::array<Card, 5>& sharedCards)
 {
 	this->sharedCards = sharedCards;
+}
+
+
+int TexasHoldem::determineWinner()
+{
+	HandValue winningValue = HandValue::HighCard;
+	if (this->currentGameState != GameState::River)
+	{
+		for (auto player : this->players)
+		{
+			HandValue playerHandValue = this->evaluateHand(player.getHand());
+			if (static_cast<int>(playerHandValue) > static_cast<int>(winningValue))
+				winningValue = playerHandValue;
+		}
+		// TODO: Get the winning player by comparing the hand value, and if the hand value is the same
+		// we need a way to compare the hands for the players.
+	}
+	else
+		return -1;
 }
 
 HandValue TexasHoldem::evaluateHand(Hand& hand)

@@ -19,4 +19,5 @@ public:
 	Player(float startingStack, Agent& decisionAgent);
 	void addCardToHand(Card card, int position);
 	void resetHand();
+	Hand getHand();
 };
