@@ -1,6 +1,7 @@
 #include "texas-holdem.h"
 #include "deck.h"
 #include "player.h"
+#include <algorithm>
 #include <vector>
 
 TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, 
