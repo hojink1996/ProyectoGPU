@@ -585,3 +585,24 @@ public:
 		Assert::AreEqual(static_cast<int>(HandValue::HighCard), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
 	}
 };
+
+
+TEST_CLASS(TestAgent)
+{
+public:
+	TEST_METHOD(TestDecision)
+	{
+		LinearAgent agent;
+		agent.initialize_theta();
+		
+		// State of all 0s should return a decision of Call
+		float state[10] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+		float maxBet = 10.0f;
+		float minBet = 1.0f;
+		Decision decision = agent.makeDecision(state, maxBet, minBet);
+
+		Assert::AreEqual(static_cast<int>(decision.play), static_cast<int>(Play::Call));
+		Assert::AreEqual(static_cast<int>(decision.betAmount), static_cast<int>(minBet));
+	}
+
+};
