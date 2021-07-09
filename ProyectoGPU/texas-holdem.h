@@ -55,6 +55,7 @@ private:
 	std::vector<Player> players;
 	std::pair<Suit, Value> getNextCard();
 	std::array<Card, 5> sharedCards;
+	uint64_t computeCardValue(Value cardValue, int shiftedBitPositions);
 	void resetDeck();
 	void resetSharedCards();
 	void resetPlayerCards();
@@ -63,18 +64,22 @@ private:
 	void drawFlop();
 	void drawTurn();
 	void drawRiver();
-	bool isRoyalFlush(const std::vector<Value>& filteredBySuitAndOrdered);
-	bool isStraightFlush(const std::vector<Value>& filteredBySuitAndOrdered);
-	bool isFourOfAKind(const std::vector<Value>& orderedCards);
-	bool isFullHouse(const std::vector<Value>& orderedCards);
-	bool isStraight(const std::vector<Value>& orderedCards);
-	bool isThreeOfAKind(const std::vector<Value>& orderedCards);
-	bool isTwoPair(const std::vector<Value>& orderedCards);
-	bool isPair(const std::vector<Value>& orderedCards);
+	void updateFullHouse(int currentLength, bool& hasPair, bool& hasThreeOfAKind, Value& threeOfAKindValue,
+		Value& pairValue, Value& currentCardValue);
+	bool isRoyalFlush(const std::vector<Value>& filteredBySuitAndOrdered, uint64_t& handValue);
+	bool isStraightFlush(const std::vector<Value>& filteredBySuitAndOrdered, uint64_t& handValue);
+	bool isFourOfAKind(const std::vector<Value>& orderedCards, uint64_t& handValue);
+	bool isFullHouse(const std::vector<Value>& orderedCards, uint64_t& handValue);
+	bool isFlush(const std::vector<Value>& filteredBySuitAndOrdered, uint64_t& handValue);
+	bool isStraight(const std::vector<Value>& orderedCards, uint64_t& handValue);
+	bool isThreeOfAKind(const std::vector<Value>& orderedCards, uint64_t& handValue);
+	bool isTwoPair(const std::vector<Value>& orderedCards, uint64_t& handValue);
+	bool isPair(const std::vector<Value>& orderedCards, uint64_t& handValue);
+	bool isHighCard(const std::vector<Value>& orderedCards, uint64_t& handValue);
 	int determineWinner();
 public:
 	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier);
-	HandValue evaluateHand(Hand& hand);
+	HandValue evaluateHand(Hand& hand, uint64_t& handValue);
 	void setSharedCards(std::array<Card, 5>& sharedCards);
 };
 
