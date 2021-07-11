@@ -34,7 +34,7 @@ void main()
 
 	*/
 
-	int iniNumIndividuals = 2;
+	int iniNumIndividuals = 3;
 	int numOpponents = 2;
 	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents);
 	ga.evaluate();
@@ -49,6 +49,8 @@ void main()
 	}
 
 	cout << "Total win: " << totalWin << endl;
+
+	ga.selectBest(1.0);
 
 	return;
 }

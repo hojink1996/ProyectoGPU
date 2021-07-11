@@ -29,6 +29,11 @@ void Agent::print_theta()
 	}
 }
 
+float* Agent::getTheta()
+{
+	return this->theta_action;
+}
+
 RandomAgent::RandomAgent()
 {
 	

@@ -632,6 +632,7 @@ public:
 			totalWin += ga.currentIndividuals[i].getNumWins();
 		}
 
+		// Assert total number of wins is equal to total number of competitions
 		Assert::AreEqual(totalWin, iniNumIndividuals * numOpponents / 2);
 	}
 

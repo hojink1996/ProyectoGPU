@@ -18,6 +18,7 @@ public:
 	virtual Decision makeDecision(float* state, float maxBet, float minBet) = 0;
 	void initialize_theta();
 	void print_theta();
+	float* getTheta();
 };
 
 /*

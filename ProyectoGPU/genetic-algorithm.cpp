@@ -45,13 +45,11 @@ void GeneticAlgorithm::evaluate()
 	// Make players to play against numOpponent players
 	for (int i = 0; i < this->numIndividuals; i++)
 	{
-		std::cout << i << ": " << this->currentIndividuals[i].getNumPlayedGames() << std::endl;
-
 		if (this->currentIndividuals[i].getNumPlayedGames() >= this->numOpponents)
 			continue;
 
-		for (int j = 0; j < this->numOpponents; j++) {
-			
+		for (int j = this->currentIndividuals[i].getNumPlayedGames(); j < this->numOpponents; j++) {
+
 			// Sample a random opponent
 			int randIdx = rand() % this->numIndividuals;
 
@@ -76,31 +74,38 @@ void GeneticAlgorithm::evaluate()
 
 void GeneticAlgorithm::selectBest(float ratio)
 {
-	/*
+	// TODO: sample from discrete distribution
+	// std::random_device device;
+	// std::mt19937 engine(device()); // Seed the random number engine
+	// std::discrete_distribution<> dist({ 150, 40, 15, 3 }); // Create the distribution
+
+	// // Now generate values with:
+	// std::cout << (dist(engine) + 1) << std::endl;
+
+	// Uniform sampling
+	std::random_device rd;  //Will be used to obtain a seed for the random number engine
+	std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+	std::uniform_int_distribution<> distrib(0, this->numIndividuals - 1);
+
+	std::vector<Individual> newIndividuals;
 	for (int i = 0; i < (int)(ratio * this->numIndividuals); i++)
 	{
-		// TODO: sample from discrete distribution
-		// std::random_device device;
-		// std::mt19937 engine(device()); // Seed the random number engine
-		// std::discrete_distribution<> dist({ 150, 40, 15, 3 }); // Create the distribution
-
-		// // Now generate values with:
-		// std::cout << (dist(engine) + 1) << std::endl;
-
-		// Uniform sampling
-		std::random_device rd;  //Will be used to obtain a seed for the random number engine
-		std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-		std::uniform_int_distribution<> distrib(0, this->numIndividuals-1);
-
 		int randIdx = distrib(gen);
-		this->newIndividuals.push_back(this->currentIndividuals[randIdx]);
+		newIndividuals.push_back(this->currentIndividuals[randIdx]);
 	}
-	this->currentIndividuals = this->newIndividuals;
+	
+	this->currentIndividuals.clear();
 
+	for (int i = 0; i < newIndividuals.size(); i++)
+	{
+		this->currentIndividuals.push_back(newIndividuals[i]);
+	}
+	
+	
 	// Empty vector of newIndividuals
-	this->newIndividuals.clear();
+	newIndividuals.clear();
+	
 
-	*/
 }
 
 void GeneticAlgorithm::crossOver()
