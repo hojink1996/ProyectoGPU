@@ -290,3 +290,47 @@ HandValue TexasHoldem::evaluateHand(Hand& hand)
 
 	return HandValue::HighCard;
 }
+
+
+float* TexasHoldem::getState() {
+	float state[2] = {
+		static_cast<float>(this->currentGameState),
+		this->minBet
+	};
+	return state;
+}
+
+void TexasHoldem::play()
+{
+	this->resetDeck();
+
+	// Small Blind
+	this->players[1].bet(this->smallBlind);
+	this->currentTotalBetAmount += this->smallBlind;
+
+	// Big Blind
+	this->players[2 % this->numPlayers].bet(this->bigBlind);
+	this->currentTotalBetAmount += this->bigBlind;
+
+	// pre-Flop
+	this->dealCards();
+	int firstBet = this->bigBlind;
+	int lastBet = -1;
+	int idx = 3;
+	int numberOfEqualBets = 1;
+	while (numberOfEqualBets != this->numPlayers)
+	{
+		// TODO: what if a player folds?
+		Decision decision = this->players[idx % this->numPlayers].decide(this->stateVector, this->maxBet, this->minBet);
+		if (decision.betAmount == firstBet)
+		{
+			numberOfEqualBets++;
+		}
+		else 
+		{
+			firstBet = decision.betAmount;
+			numberOfEqualBets = 1;
+		}
+		idx++;
+	}
+}

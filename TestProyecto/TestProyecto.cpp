@@ -15,6 +15,10 @@
 #include "../ProyectoGPU/texas-holdem.cpp"
 #include "../ProyectoGPU/agent.h"
 #include "../ProyectoGPU/agent.cpp"
+#include "../ProyectoGPU/individual.h"
+#include "../ProyectoGPU/individual.cpp"
+#include "../ProyectoGPU/genetic-algorithm.h"
+#include "../ProyectoGPU/genetic-algorithm.cpp"
 
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -603,6 +607,32 @@ public:
 
 		Assert::AreEqual(static_cast<int>(decision.play), static_cast<int>(Play::Call));
 		Assert::AreEqual(static_cast<int>(decision.betAmount), static_cast<int>(minBet));
+	}
+
+};
+
+
+
+TEST_CLASS(TestGeneticAlgorithm)
+{
+public:
+	TEST_METHOD(TestEvaluation)
+	{
+		int iniNumIndividuals = 4;
+		int numOpponents = 2;
+		GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents);
+		ga.evaluate();
+
+		int totalWin = 0;
+
+		// Assert all individuals competed 'numOpponents' times
+		for (int i=0; i<ga.getNumIndividuals(); i++)
+		{
+			Assert::AreEqual(ga.currentIndividuals[i].getNumPlayedGames(), numOpponents);
+			totalWin += ga.currentIndividuals[i].getNumWins();
+		}
+
+		Assert::AreEqual(totalWin, iniNumIndividuals * numOpponents / 2);
 	}
 
 };

@@ -1,7 +1,7 @@
 #include "card.h"
 #include "player.h"
 
-Player::Player(float startingStack, Agent& decisionAgent) : decisionAgent(decisionAgent)
+Player::Player(int startingStack, Agent& decisionAgent) : decisionAgent(decisionAgent)
 {
 	this->stack = startingStack;
 }
@@ -19,4 +19,14 @@ void Player::resetHand()
 Hand Player::getHand()
 {
 	return this->hand;
+}
+
+Decision Player::decide(float* state, int maxBet, int minBet)
+{
+	return this->decisionAgent.makeDecision(state, maxBet, minBet);
+}
+
+void Player::bet(int amount)
+{
+	this->stack -= amount;
 }

@@ -55,6 +55,12 @@ private:
 	std::vector<Player> players;
 	std::pair<Suit, Value> getNextCard();
 	std::array<Card, 5> sharedCards;
+	int maxBet = 500;
+	int minBet = 1;
+	int smallBlind = 1;
+	int bigBlind = 2;
+	int currentTotalBetAmount = 0;
+	float* stateVector;
 	void resetDeck();
 	void resetSharedCards();
 	void resetPlayerCards();
@@ -76,5 +82,7 @@ public:
 	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier);
 	HandValue evaluateHand(Hand& hand);
 	void setSharedCards(std::array<Card, 5>& sharedCards);
+	float* getState();
+	void play();
 };
 

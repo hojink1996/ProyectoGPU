@@ -83,7 +83,10 @@
     <ClCompile Include="agent.cpp" />
     <ClCompile Include="card.cpp" />
     <ClCompile Include="deck.cpp" />
+    <ClCompile Include="genetic-algorithm.cpp" />
     <ClCompile Include="hand.cpp" />
+    <ClCompile Include="individual.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="straight-identifier.cpp" />
     <ClCompile Include="texas-holdem.cpp" />
@@ -93,7 +96,9 @@
     <ClInclude Include="card.h" />
     <ClInclude Include="decision.h" />
     <ClInclude Include="deck.h" />
+    <ClInclude Include="genetic-algorithm.h" />
     <ClInclude Include="hand.h" />
+    <ClInclude Include="individual.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="straight-identifier.h" />
     <ClInclude Include="texas-holdem.h" />
