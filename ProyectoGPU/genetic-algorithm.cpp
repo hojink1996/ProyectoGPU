@@ -75,22 +75,29 @@ void GeneticAlgorithm::evaluate()
 void GeneticAlgorithm::selectBest(float ratio)
 {
 	// TODO: sample from discrete distribution
-	// std::random_device device;
-	// std::mt19937 engine(device()); // Seed the random number engine
-	// std::discrete_distribution<> dist({ 150, 40, 15, 3 }); // Create the distribution
+	std::random_device device;
+	std::mt19937 generator(device()); // Seed the random number engine
+	
+	std::vector<int> scores;
 
-	// // Now generate values with:
-	// std::cout << (dist(engine) + 1) << std::endl;
+	for (int i = 0; i < this->currentIndividuals.size(); i++)
+	{
+		scores.push_back(this->currentIndividuals[i].getNumWins());
+	}
+	
+	std::discrete_distribution<> distrib(scores.begin(), scores.end()); // Create the distribution
 
+	/*
 	// Uniform sampling
 	std::random_device rd;  //Will be used to obtain a seed for the random number engine
-	std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+	std::mt19937 generator(rd()); //Standard mersenne_twister_engine seeded with rd()
 	std::uniform_int_distribution<> distrib(0, this->numIndividuals - 1);
-
+	*/
+	
 	std::vector<Individual> newIndividuals;
 	for (int i = 0; i < (int)(ratio * this->numIndividuals); i++)
 	{
-		int randIdx = distrib(gen);
+		int randIdx = distrib(generator);
 		newIndividuals.push_back(this->currentIndividuals[randIdx]);
 	}
 	
@@ -100,12 +107,12 @@ void GeneticAlgorithm::selectBest(float ratio)
 	{
 		this->currentIndividuals.push_back(newIndividuals[i]);
 	}
-	
+	this->numIndividuals = this->currentIndividuals.size();
 	
 	// Empty vector of newIndividuals
 	newIndividuals.clear();
 	
-
+	
 }
 
 void GeneticAlgorithm::crossOver()
