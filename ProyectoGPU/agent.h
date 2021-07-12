@@ -12,24 +12,25 @@ class Agent
 {
 private:
 protected:
-	float theta_action[10];
-	float theta_amount[10];
+	
 public:
 	virtual Decision makeDecision(float* state, float maxBet, float minBet) = 0;
-	void initialize_theta();
-	void print_theta();
-	float* getTheta();
+	virtual float* getTheta() = 0;
+	virtual int getThetaSize() = 0;
+
 };
 
 /*
 RandomAgent: Agent that makes decision randomly.
 */
-class RandomAgent : public Agent
+class RandomAgent : protected Agent
 {
 private:
 public:
 	RandomAgent();
 	Decision makeDecision(float* state, float maxBet, float minBet);
+	float* getTheta();
+	int getThetaSize();
 };
 
 /*
@@ -38,9 +39,16 @@ LinearAgent: Agent that makes decision given a linear combination with its param
 class LinearAgent : public Agent
 {
 private:
+	int thetaSize = 20;
+	float theta[20];  // first 10 is for action, last 10 is for amount
+
 	bool compute_fold(float* state);
 	float compute_amount(float* state);
 public:
-	LinearAgent();
+	LinearAgent(int thetaSize);
 	Decision makeDecision(float* state, float maxBet, float minBet);
+
+	void printTheta();
+	float* getTheta();
+	int getThetaSize();
 };

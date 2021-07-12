@@ -15,7 +15,7 @@ public:
 	void evaluate();
 	void selectBest(float ratio);
 	void crossOver();
-	void mutate(float probab);
+	void mutate();
 
 	int getNumIndividuals();
 	std::vector<Player> currentIndividuals;

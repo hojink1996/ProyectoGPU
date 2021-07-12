@@ -8,7 +8,6 @@
 #include "../ProyectoGPU/straight-identifier.h"
 #include "../ProyectoGPU/texas-holdem.h"
 #include "../ProyectoGPU/agent.h"
-#include "../ProyectoGPU/individual.h"
 #include "../ProyectoGPU/genetic-algorithm.h"
 
 using namespace std;
@@ -33,12 +32,16 @@ void main()
 	cout << "Amount: " << decision.betAmount << endl;
 
 	*/
+	
+	LinearAgent agent = LinearAgent(20);
 
 	int iniNumIndividuals = 3;
 	int numOpponents = 2;
 	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents);
+	
+	/*
 	ga.evaluate();
-
+	
 	int totalWin = 0;
 
 	// Assert all individuals competed 'numOpponents' times
@@ -51,6 +54,9 @@ void main()
 	cout << "Total win: " << totalWin << endl;
 
 	ga.selectBest(1.0);
+	*/
+
+	ga.crossOver();
 
 	return;
 }

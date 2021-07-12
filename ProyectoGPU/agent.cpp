@@ -5,34 +5,26 @@
 
 using namespace std;
 
-void Agent::initialize_theta() 
-{
-	for (int i = 0; i < 10; i++) 
-	{
-		// Fill with random values between -1 and 1
-		this->theta_action[i] = (float)rand() / RAND_MAX * 2 - 1;
-		this->theta_amount[i] = (float)rand() / RAND_MAX * 2 - 1;
-	}
-}
 
-void Agent::print_theta()
+void LinearAgent::printTheta()
 {
-	cout << "Theta action:" << endl;
-	for (float value: this->theta_action)
-	{
-		cout << value << endl;
-	}
-	cout << "Theta amount:" << endl;
-	for (float value : this->theta_amount)
+	cout << "Theta:" << endl;
+	for (float value : this->theta)
 	{
 		cout << value << endl;
 	}
 }
 
-float* Agent::getTheta()
+float* LinearAgent::getTheta()
 {
-	return this->theta_action;
+	return this->theta;
 }
+
+int LinearAgent::getThetaSize()
+{
+	return this->thetaSize;
+}
+
 
 RandomAgent::RandomAgent()
 {
@@ -48,9 +40,24 @@ Decision RandomAgent::makeDecision(float* state, float maxBet, float minBet)
 	return decision;
 }
 
-LinearAgent::LinearAgent()
+float* RandomAgent::getTheta()
 {
+	return nullptr;
+}
 
+int RandomAgent::getThetaSize()
+{
+	return 0;
+}
+
+LinearAgent::LinearAgent(int thetaSize)
+{
+	this->thetaSize = thetaSize;
+	for (int i = 0; i < thetaSize; i++)
+	{
+		// Fill with random values between -1 and 1
+		this->theta[i] = (float)rand() / RAND_MAX * 2 - 1;
+	}
 }
 
 
@@ -60,7 +67,7 @@ bool LinearAgent::compute_fold(float* state)
 	float result = 0.0f;
 	for (int i = 0; i < size; i++)
 	{
-		result += this->theta_action[i] * state[i];
+		result += this->theta[i] * state[i];
 	}
 	return result < 0.0;
 }
@@ -69,9 +76,9 @@ float LinearAgent::compute_amount(float* state)
 {
 	int size = sizeof(state) / sizeof(state[0]);
 	float result = 0.0f;
-	for (int i = 0; i < size; i++)
+	for (int i = size; i < size * 2; i++)
 	{
-		result += this->theta_action[i] * state[i];
+		result += this->theta[i] * state[i];
 	}
 	return result;
 }

@@ -15,6 +15,10 @@ private:
 	Hand& hand{ Hand() };
 	float lastBet{ 0.0f };
 	Agent& decisionAgent;
+
+	int numPlayedGames;
+	int numWins;
+
 public:
 	Player(int startingStack, Agent& decisionAgent);
 	void addCardToHand(Card card, int position);
@@ -22,4 +26,12 @@ public:
 	Hand getHand();
 	void bet(int amount);
 	Decision decide(float* state, int maxBet, int minBet);
+
+	void registerWin();
+	void addPlayedGame();
+	int  getNumPlayedGames();
+	int getNumWins();
+
+	float* getStrategy();
+	int getStrategySize();
 };

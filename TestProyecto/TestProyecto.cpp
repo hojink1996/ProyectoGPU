@@ -15,8 +15,6 @@
 #include "../ProyectoGPU/texas-holdem.cpp"
 #include "../ProyectoGPU/agent.h"
 #include "../ProyectoGPU/agent.cpp"
-#include "../ProyectoGPU/individual.h"
-#include "../ProyectoGPU/individual.cpp"
 #include "../ProyectoGPU/genetic-algorithm.h"
 #include "../ProyectoGPU/genetic-algorithm.cpp"
 
@@ -596,9 +594,8 @@ TEST_CLASS(TestAgent)
 public:
 	TEST_METHOD(TestDecision)
 	{
-		LinearAgent agent;
-		agent.initialize_theta();
-		
+		LinearAgent agent = LinearAgent(20);
+
 		// State of all 0s should return a decision of Call
 		float state[10] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 		float maxBet = 10.0f;
