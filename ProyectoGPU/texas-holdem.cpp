@@ -12,7 +12,7 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAge
 	this->numPlayers = numPlayers;
 	this->sharedCards = { invalidCard, invalidCard, invalidCard, invalidCard, invalidCard };
 	for (int i = 0; i < numPlayers; ++i)
-		this->players.push_back(Player(startingStack, decisionAgent));
+		this->players.push_back(Player(startingStack, &decisionAgent));
 }
 
 void TexasHoldem::resetDeck()

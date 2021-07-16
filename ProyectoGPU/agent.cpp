@@ -9,9 +9,9 @@ using namespace std;
 void LinearAgent::printTheta()
 {
 	cout << "Theta:" << endl;
-	for (float value : this->theta)
+	for (int i=0; i<this->thetaSize; i++)
 	{
-		cout << value << endl;
+		cout << this->theta[i] << endl;
 	}
 }
 
@@ -42,7 +42,8 @@ Decision RandomAgent::makeDecision(float* state, float maxBet, float minBet)
 
 float* RandomAgent::getTheta()
 {
-	return nullptr;
+	float theta[1];
+	return theta;
 }
 
 int RandomAgent::getThetaSize()
@@ -53,13 +54,13 @@ int RandomAgent::getThetaSize()
 LinearAgent::LinearAgent(int thetaSize)
 {
 	this->thetaSize = thetaSize;
+	this->theta = new float[thetaSize]();
 	for (int i = 0; i < thetaSize; i++)
 	{
 		// Fill with random values between -1 and 1
 		this->theta[i] = (float)rand() / RAND_MAX * 2 - 1;
 	}
 }
-
 
 bool LinearAgent::compute_fold(float* state)
 {

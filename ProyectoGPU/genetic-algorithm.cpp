@@ -8,12 +8,13 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents)
 {
 	this->numIndividuals = iniNumIndividuals;
 	this->numOpponents = numOpponents;
-	for (int i = 0; i < this->numIndividuals; i++) {
-		LinearAgent agent = LinearAgent(20);
-		int startingStack = 1000;
+
+	int startingStack = 1000;	
+	for (int i = 0; i < this->numIndividuals; i++) 
+	{
+		LinearAgent* agent = new LinearAgent(20);
 		Player player = Player(startingStack, agent);
-		this->currentIndividuals.push_back(Player(startingStack, agent));
-		this->test.push_back(player);
+		this->currentIndividuals.push_back(player);
 	}
 }
 
@@ -105,8 +106,10 @@ void GeneticAlgorithm::selectBest(float ratio)
 
 void GeneticAlgorithm::crossOver()
 {
+	
 	for (int i = 0; i < this->numIndividuals - 1; i += 2)  // if 'numIndividuals' is odd, the last individual is skipped
 	{
+		
 		// TODO: solve bug of inheritance of Agent class
 		float* strategy1 = this->currentIndividuals[i].getStrategy();
 		float* strategy2 = this->currentIndividuals[i + 1].getStrategy();
@@ -120,8 +123,6 @@ void GeneticAlgorithm::crossOver()
 			strategy1[j] = strategy2[j];
 			strategy2[j] = aux;
 		}
-		
-
 	}
 }
 
@@ -142,8 +143,6 @@ void GeneticAlgorithm::mutate(float probab)
 			if (sample < probab)
 				strategy[i] = -strategy[i];
 		}
-
-
 	}
 }
 

@@ -1,7 +1,7 @@
 #include "card.h"
 #include "player.h"
 
-Player::Player(int startingStack, Agent& decisionAgent) : decisionAgent(decisionAgent)
+Player::Player(int startingStack, Agent* decisionAgent) : decisionAgent(*decisionAgent)
 {
 	this->stack = startingStack;
 	this->numPlayedGames = 0;

@@ -39,7 +39,7 @@ void main()
 	int numOpponents = 2;
 	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents);
 	
-	/*
+	
 	ga.evaluate();
 	
 	int totalWin = 0;
@@ -54,9 +54,10 @@ void main()
 	cout << "Total win: " << totalWin << endl;
 
 	ga.selectBest(1.0);
-	*/
+	
 
 	ga.crossOver();
+	ga.mutate(0.5);
 
 	return;
 }

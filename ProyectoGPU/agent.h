@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include "decision.h"
 
 /*
@@ -17,7 +18,6 @@ public:
 	virtual Decision makeDecision(float* state, float maxBet, float minBet) = 0;
 	virtual float* getTheta() = 0;
 	virtual int getThetaSize() = 0;
-
 };
 
 /*
@@ -39,8 +39,8 @@ LinearAgent: Agent that makes decision given a linear combination with its param
 class LinearAgent : public Agent
 {
 private:
-	int thetaSize = 20;
-	float theta[20];  // first 10 is for action, last 10 is for amount
+	int thetaSize;
+	float* theta;  // first 10 is for action, last 10 is for amount
 
 	bool compute_fold(float* state);
 	float compute_amount(float* state);
