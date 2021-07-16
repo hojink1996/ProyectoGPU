@@ -20,3 +20,9 @@ Hand Player::getHand()
 {
 	return this->hand;
 }
+
+Decision Player::makeDecision()
+{
+	return this->decisionAgent.makeDecision(this->stack);
+}
+

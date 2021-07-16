@@ -3,6 +3,7 @@
 #include "player.h"
 #include <vector>
 #include <cstdint>
+#include <cassert>
 
 TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, 
 	StraightIdentifier& straightIdentifier): currentDeck(deck), straightIdentifier(straightIdentifier)
@@ -73,6 +74,7 @@ void TexasHoldem::endRound()
 	this->resetDeck();
 	this->resetPlayerCards();
 	this->resetSharedCards();
+	this->dealerPosition = (this->dealerPosition + 1) % (this->numPlayers);
 	GameState::Invalid;
 }
 
@@ -450,21 +452,31 @@ void TexasHoldem::setSharedCards(std::array<Card, 5>& sharedCards)
 
 int TexasHoldem::determineWinner()
 {
+	assert(this->currentGameState == GameState::River);
 	HandValue winningValue = HandValue::HighCard;
-	if (this->currentGameState == GameState::River)
+	uint64_t winningHandValue = 0;
+	int winningIndex = -1;
+	int currentIndex = 0;
+	for (auto player : this->players)
 	{
-		for (auto player : this->players)
+		uint64_t handValue = 0;
+		HandValue playerHandValue = this->evaluateHand(player.getHand(), handValue);
+		if (static_cast<int>(playerHandValue) > static_cast<int>(winningValue))
 		{
-			uint64_t handValue;
-			HandValue playerHandValue = this->evaluateHand(player.getHand(), handValue);
-			if (static_cast<int>(playerHandValue) > static_cast<int>(winningValue))
-				winningValue = playerHandValue;
+			winningValue = playerHandValue;
+			winningHandValue = handValue;
+			winningIndex = currentIndex;
 		}
-		// TODO: Get the winning player by comparing the hand value, and if the hand value is the same
-		// we need a way to compare the hands for the players.
+		else if ((static_cast<int>(playerHandValue) == static_cast<int>(winningValue)) && (handValue > winningHandValue))
+		{
+			winningValue = playerHandValue;
+			winningHandValue = handValue;
+			winningIndex = currentIndex;
+		}
 	}
-	else
-		return -1;
+	assert(winningIndex >= 0);
+	
+	return winningIndex;
 }
 
 HandValue TexasHoldem::evaluateHand(Hand& hand, uint64_t& handValue)
@@ -534,4 +546,52 @@ HandValue TexasHoldem::evaluateHand(Hand& hand, uint64_t& handValue)
 
 	this->isHighCard(orderedByValue, handValue);
 	return HandValue::HighCard;
+}
+
+void TexasHoldem::playRound()
+{
+	this->dealCards();
+	this->bettingRound();
+	this->drawFlop();
+	this->bettingRound();
+	this->drawRiver();
+	this->bettingRound();
+	this->drawTurn();
+	this->bettingRound();
+	int winnerIndex = this->determineWinner();
+	this->endRound();
+}
+
+void TexasHoldem::playMultipleRounds(int numberOfRounds)
+{
+	for (int round = 0; round < numberOfRounds; ++round)
+		this->playRound;
+}
+
+void TexasHoldem::bettingRound()
+{
+	int betStartingPosition, lastBetPosition;
+	float currentBetValue = 0.0f;
+	if (this->currentGameState == GameState::PreFlop)
+		betStartingPosition = (this->dealerPosition + 3) % (this->numPlayers);
+	else
+		betStartingPosition = (this->dealerPosition - 1) % (this->numPlayers);
+	lastBetPosition = (betStartingPosition - 1) % (this->numPlayers);
+
+	int currentPosition = betStartingPosition;
+	while (true)
+	{
+		Decision currentPlayerDecision = this->players.at(currentPosition).makeDecision();
+		if (currentPlayerDecision.play == Play::Raise)
+		{
+			currentBetValue += currentPlayerDecision.betAmount;
+			lastBetPosition = (currentPosition - 1) % (this->numPlayers);
+		}
+		else
+		{
+			if (lastBetPosition == currentPosition)
+				break;
+		}
+		++currentPosition;
+	}
 }
