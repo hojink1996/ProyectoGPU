@@ -23,7 +23,7 @@ public:
 /*
 RandomAgent: Agent that makes decision randomly.
 */
-class RandomAgent : protected Agent
+class RandomAgent : public Agent
 {
 private:
 public:

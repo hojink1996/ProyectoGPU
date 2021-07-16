@@ -633,4 +633,70 @@ public:
 		Assert::AreEqual(totalWin, iniNumIndividuals * numOpponents / 2);
 	}
 
+	TEST_METHOD(TestCrossOver)
+	{
+		int iniNumIndividuals = 3;
+		int numOpponents = 2;
+		GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents);
+		float* strategy0 = ga.getIndividualStrategyByIndex(0);
+		float* strategy1 = ga.getIndividualStrategyByIndex(1);
+		float* strategy2 = ga.getIndividualStrategyByIndex(2);
+
+		int lastIdx = 19;
+		float s0 = strategy0[lastIdx];
+		float s1 = strategy1[lastIdx];
+		float s2 = strategy2[lastIdx];
+
+		ga.crossOver();
+		float* crossedStrategy0 = ga.getIndividualStrategyByIndex(0);
+		float* crossedStrategy1 = ga.getIndividualStrategyByIndex(1);
+		float* crossedStrategy2 = ga.getIndividualStrategyByIndex(2);
+
+		// We don't know in which index was the cross over, but at least the last element of the array 
+		// should be changed in (thetaSize-1)/thetaSize of the times.
+		Assert::AreNotEqual(s0, crossedStrategy0[lastIdx]);
+		Assert::AreNotEqual(s1, crossedStrategy1[lastIdx]);
+
+		// 3rd individual's strategy is not crossed because the number of individuals is odd
+		Assert::AreEqual(s2, crossedStrategy2[lastIdx]);
+	}
+
+	TEST_METHOD(TestMutate)
+	{
+		int iniNumIndividuals = 3;
+		int numOpponents = 2;
+		GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents);
+		float* strategy0 = ga.getIndividualStrategyByIndex(0);
+		float* strategy1 = ga.getIndividualStrategyByIndex(1);
+		float* strategy2 = ga.getIndividualStrategyByIndex(2);
+
+		float s0 = strategy0[0];
+		float s1 = strategy1[0];
+		float s2 = strategy2[0];
+
+		// Mutate all values
+		ga.mutate(1.0);
+		float* mutatedStrategy0 = ga.getIndividualStrategyByIndex(0);
+		float* mutatedStrategy1 = ga.getIndividualStrategyByIndex(1);
+		float* mutatedStrategy2 = ga.getIndividualStrategyByIndex(2);
+
+		Assert::AreNotEqual(s0, mutatedStrategy0[0]);
+		Assert::AreNotEqual(s1, mutatedStrategy1[0]);
+		Assert::AreNotEqual(s2, mutatedStrategy2[0]);
+
+		float ms0 = mutatedStrategy0[0];
+		float ms1 = mutatedStrategy1[0];
+		float ms2 = mutatedStrategy2[0];
+
+		// Not mutate any value
+		ga.mutate(0.0);
+		float* mutatedAgainStrategy0 = ga.getIndividualStrategyByIndex(0);
+		float* mutatedAgainStrategy1 = ga.getIndividualStrategyByIndex(1);
+		float* mutatedAgainStrategy2 = ga.getIndividualStrategyByIndex(2);
+
+		Assert::AreEqual(ms0, mutatedAgainStrategy0[0]);
+		Assert::AreEqual(ms1, mutatedAgainStrategy1[0]);
+		Assert::AreEqual(ms2, mutatedAgainStrategy2[0]);
+	}
+
 };

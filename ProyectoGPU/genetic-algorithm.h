@@ -17,5 +17,6 @@ public:
 	void mutate(float probab);
 
 	int getNumIndividuals();
+	float* getIndividualStrategyByIndex(int idx);
 	std::vector<Player> currentIndividuals;
 };

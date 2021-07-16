@@ -109,13 +109,12 @@ void GeneticAlgorithm::crossOver()
 	
 	for (int i = 0; i < this->numIndividuals - 1; i += 2)  // if 'numIndividuals' is odd, the last individual is skipped
 	{
-		
-		// TODO: solve bug of inheritance of Agent class
 		float* strategy1 = this->currentIndividuals[i].getStrategy();
 		float* strategy2 = this->currentIndividuals[i + 1].getStrategy();
 
 		int strategySize = this->currentIndividuals[i].getStrategySize();
 		int crossOverIdx = rand() % strategySize;
+
 
 		for (int j = crossOverIdx; j < strategySize; j++)
 		{
@@ -128,20 +127,19 @@ void GeneticAlgorithm::crossOver()
 
 void GeneticAlgorithm::mutate(float probab)
 {
+	int probabPercent = (int)probab * 100;
 	for (int i = 0; i < this->numIndividuals; i++)  // if 'numIndividuals' is odd, the last individual is skipped
 	{
-		// TODO: solve bug of inheritance of Agent class
 		float* strategy = this->currentIndividuals[i].getStrategy();
-
 		int strategySize = this->currentIndividuals[i].getStrategySize();
 
-		// Iterate over elements of the strategy vector
+		// Iterate over elements of the strategy array
 		for (int j = 0; j < strategySize; j++)
 		{
 			// Mutate (change sign) with probability 'probab'
-			float sample = (rand() % 100) / 100;
-			if (sample < probab)
-				strategy[i] = -strategy[i];
+			int sample = rand() % 100;
+			if (sample < probabPercent)
+				strategy[j] = -strategy[j];
 		}
 	}
 }
@@ -149,4 +147,9 @@ void GeneticAlgorithm::mutate(float probab)
 int GeneticAlgorithm::getNumIndividuals()
 {
 	return this->numIndividuals;
+}
+
+float* GeneticAlgorithm::getIndividualStrategyByIndex(int idx)
+{
+	return this->currentIndividuals[idx].getStrategy();
 }
