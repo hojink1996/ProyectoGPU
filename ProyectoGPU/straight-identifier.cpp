@@ -14,10 +14,11 @@ void StraightIdentifier::reset()
 	this->currentValue = Value::Invalid;
 }
 
-bool StraightIdentifier::hasStraight(const std::vector<Value>& orderedByValue)
+bool StraightIdentifier::hasStraight(const std::vector<Value>& orderedByValue, Value& highCard)
 {
 	this->reset();
 	bool startsWithAce = (orderedByValue[0] == Value::Ace);
+	bool hasStraight = false;
 	// Loop over the values and only update if we use the same card as before
 	for (int currentCard = 0; currentCard < orderedByValue.size(); ++currentCard)
 	{
@@ -32,21 +33,36 @@ bool StraightIdentifier::hasStraight(const std::vector<Value>& orderedByValue)
 			continue;
 		else
 		{
-			if (maxLength >= 5)
-				return true;
+			if (this->maxLength >= 5)
+			{
+				highCard = this->currentValue;
+				hasStraight = true;
+			}
 			this->maxLength = 1;
 			this->currentValue = currentValue;
 			this->nextValue = static_cast<Value>((static_cast<int>(currentValue) + 1) % 13);
 		}
 	}
+	if (this->maxLength >= 5)
+	{
+		highCard = this->currentValue;
+		hasStraight = true;
+	}
 	if (startsWithAce && (this->nextValue == Value::Ace))
+	{
 		++this->maxLength;
+		if (this->maxLength >= 5)
+		{
+			highCard = Value::Ace;
+			hasStraight = true;
+		}
+	}
 	int maxLength = this->maxLength;
 	this->reset();
-	return maxLength >= 5;
+	return hasStraight;
 }
 
-bool StraightIdentifier::hasRoyalStraight(const std::vector<Value>& filteredBySuitAndOrdered)
+bool StraightIdentifier::hasRoyalStraight(const std::vector<Value>& filteredBySuitAndOrdered, Value& highCard)
 {
 	this->reset();
 	// Loop over all the values with the same suit
@@ -75,9 +91,10 @@ bool StraightIdentifier::hasRoyalStraight(const std::vector<Value>& filteredBySu
 	return maxLength >= 5;
 }
 
-bool StraightIdentifier::hasStraightFlush(const std::vector<Value>& filteredBySuitAndOrdered)
+bool StraightIdentifier::hasStraightFlush(const std::vector<Value>& filteredBySuitAndOrdered, Value& highCard)
 {
 	this->reset();
+	bool hasStraight = false;
 	// Loop over the cards in the vector
 	for (int currentCard = 0; currentCard < filteredBySuitAndOrdered.size(); ++currentCard)
 	{
@@ -86,6 +103,7 @@ bool StraightIdentifier::hasStraightFlush(const std::vector<Value>& filteredBySu
 		if ((this->nextValue == Value::Invalid) || (this->nextValue == currentValue))
 		{
 			this->nextValue = static_cast<Value>((static_cast<int>(currentValue) + 1) % 13);
+			this->currentValue = currentValue;
 			++this->maxLength;
 		}
 		else
@@ -93,16 +111,27 @@ bool StraightIdentifier::hasStraightFlush(const std::vector<Value>& filteredBySu
 			if (this->maxLength < 5)
 			{
 				this->nextValue = static_cast<Value>((static_cast<int>(currentValue) + 1) % 13);
+				this->currentValue = currentValue;
 				this->maxLength = 1;
 			}
 			else
-				break;
+			{
+				hasStraight = true;
+				highCard = this->currentValue;
+				this->nextValue = static_cast<Value>((static_cast<int>(currentValue) + 1) % 13);
+				this->currentValue = currentValue;
+				this->maxLength = 1;
+			}
 		}
 	}
-
+	if (this->maxLength >= 5)
+	{
+		highCard = this->currentValue;
+		hasStraight = true;
+	}
 	// Check if we got the needed length
 	int maxLength = this->maxLength;
 	this->reset();
-	return maxLength >= 5;
+	return hasStraight;
 }
 

@@ -39,6 +39,7 @@ Function used to order the card values when sorting
 */
 namespace CardEvaluation {
 	bool orderCardValue(Value left, Value right);
+	bool leftCardHasGreaterValue(Value left, Value right);
 };
 
 typedef std::pair<Suit, Value> Card;

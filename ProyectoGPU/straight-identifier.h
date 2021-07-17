@@ -12,7 +12,7 @@ private:
 	void reset();
 public:
 	StraightIdentifier();
-	bool hasRoyalStraight(const std::vector<Value>& filteredBySuitAndOrdered);
-	bool hasStraightFlush(const std::vector<Value>& filteredBySuitAndOrdered);
-	bool hasStraight(const std::vector<Value>& orderedByValue);
+	bool hasRoyalStraight(const std::vector<Value>& filteredBySuitAndOrdered, Value& highCard);
+	bool hasStraightFlush(const std::vector<Value>& filteredBySuitAndOrdered, Value& highCard);
+	bool hasStraight(const std::vector<Value>& orderedByValue, Value& highCard);
 };

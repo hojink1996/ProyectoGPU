@@ -134,10 +134,11 @@ public:
 		std::vector<Value> isStraightButNotRoyalStraight{ Value::Ace, Value::Two, Value::Three, Value::Four, Value::Five };
 
 		// Check the output
-		Assert::IsTrue(straightIdentifier.hasRoyalStraight(basicRoyalStraight));
-		Assert::IsTrue(straightIdentifier.hasRoyalStraight(royalStraightWithExtra));
-		Assert::IsFalse(straightIdentifier.hasRoyalStraight(notRoyalStraight));
-		Assert::IsFalse(straightIdentifier.hasRoyalStraight(isStraightButNotRoyalStraight));
+		Value highCard = Value::Invalid;
+		Assert::IsTrue(straightIdentifier.hasRoyalStraight(basicRoyalStraight, highCard));
+		Assert::IsTrue(straightIdentifier.hasRoyalStraight(royalStraightWithExtra, highCard));
+		Assert::IsFalse(straightIdentifier.hasRoyalStraight(notRoyalStraight, highCard));
+		Assert::IsFalse(straightIdentifier.hasRoyalStraight(isStraightButNotRoyalStraight, highCard));
 	}
 
 	TEST_METHOD(TestStraightFlush)
@@ -150,11 +151,12 @@ public:
 		std::vector<Value> notStraightThrees{ Value::Three, Value::Four, Value::Five, Value::Ten, Value::Jack, Value::Queen };
 
 		// Check the output
-		Assert::IsTrue(straightIdentifier.hasStraightFlush(basicStraight));
-		Assert::IsTrue(straightIdentifier.hasStraightFlush(simpleMixedStraight));
-		Assert::IsTrue(straightIdentifier.hasStraightFlush(mixedStraight));
-		Assert::IsFalse(straightIdentifier.hasStraightFlush(notStraight));
-		Assert::IsFalse(straightIdentifier.hasStraightFlush(notStraightThrees));
+		Value highCard = Value::Invalid;
+		Assert::IsTrue(straightIdentifier.hasStraightFlush(basicStraight, highCard));
+		Assert::IsTrue(straightIdentifier.hasStraightFlush(simpleMixedStraight, highCard));
+		Assert::IsTrue(straightIdentifier.hasStraightFlush(mixedStraight, highCard));
+		Assert::IsFalse(straightIdentifier.hasStraightFlush(notStraight, highCard));
+		Assert::IsFalse(straightIdentifier.hasStraightFlush(notStraightThrees, highCard));
 	}
 };
 
@@ -186,17 +188,21 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Check the value we get from the game
-		HandValue handValue =  texasHoldemGame.evaluateHand(hand);
+		uint64_t cardValue = 0;
+		HandValue handValue =  texasHoldemGame.evaluateHand(hand, cardValue);
 
 		// Check that we get the expected value
 		Assert::AreEqual(static_cast<int>(HandValue::RoyalFlush), static_cast<int>(handValue));
 
-		// Change to the scenario that is not a royal flus
+		// Change to the scenario that is not a royal flush
 		texasHoldemGame.setSharedCards(sharedCardNotRoyal);
-		handValue = texasHoldemGame.evaluateHand(hand);
+		cardValue = 0;
+		handValue = texasHoldemGame.evaluateHand(hand, cardValue);
+		uint64_t expectedCardValue = 0b0111000001010;
 		Assert::AreEqual(static_cast<int>(HandValue::Flush), static_cast<int>(handValue));
+		Assert::AreEqual(cardValue, expectedCardValue);
 	}
-	TEST_METHOD(TestStraghtFlush)
+	TEST_METHOD(TestStraightFlush)
 	{
 		// Create a game of TexasHoldem
 		RandomAgent decisionAgent = RandomAgent();
@@ -218,17 +224,25 @@ public:
 
 		// Check the value from the game
 		texasHoldemGame.setSharedCards(sharedCards);
-		HandValue handValue = texasHoldemGame.evaluateHand(hand);
+		uint64_t cardValue = 0;
+		uint64_t expectedCardValue = 0b0000010000000;
+		HandValue handValue = texasHoldemGame.evaluateHand(hand, cardValue);
 		Assert::AreEqual(static_cast<int>(HandValue::StraightFlush), static_cast<int>(handValue));
+		Assert::AreEqual(cardValue, expectedCardValue);
 		hand.resetHand();
 
 		// Check the case for an incorrect hand
 		firstCard = std::make_pair(Suit::Clubs, Value::Seven);
 		secondCard = std::make_pair(Suit::Clubs, Value::Eight);
+		hand.addCardToHand(firstCard, 0);
+		hand.addCardToHand(secondCard, 1);
 
 		// Check that we don't get a straight flush in this case
-		handValue = texasHoldemGame.evaluateHand(hand);
+		cardValue = 0;
+		expectedCardValue = 0b0000010000000;
+		handValue = texasHoldemGame.evaluateHand(hand, cardValue);
 		Assert::AreNotEqual(static_cast<int>(HandValue::StraightFlush), static_cast<int>(handValue));
+		Assert::AreEqual(expectedCardValue, cardValue);
 	}
 
 	TEST_METHOD(TestFourOfAKind)
@@ -253,14 +267,22 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Check that we get the desired output
-		Assert::AreEqual(static_cast<int>(HandValue::FourOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		uint64_t cardValue = 0;
+		uint64_t expectedCardValue = 0b00000000010000000010000000;
+		Assert::AreEqual(static_cast<int>(HandValue::FourOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Change the hand to not have a four of a kind
 		firstCard = std::make_pair(Suit::Hearts, Value::Nine);
+		cardValue = 0;
+		expectedCardValue = 0b00000000010000000010000000;
 		hand.addCardToHand(firstCard, 0);
-		Assert::AreNotEqual(static_cast<int>(HandValue::FourOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		Assert::AreNotEqual(static_cast<int>(HandValue::FourOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Check the case when we have a non smallest value four of a kind
+		cardValue = 0;
+		expectedCardValue = 0b00000100000000000000010000;
 		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::Five), std::make_pair(Suit::Diamonds, Value::Nine),
 										 std::make_pair(Suit::Clubs, Value::Nine), std::make_pair(Suit::Diamonds, Value::Six),
 										 std::make_pair(Suit::Hearts, Value::Five) };
@@ -270,7 +292,8 @@ public:
 		hand.addCardToHand(firstCard, 0);
 		hand.addCardToHand(secondCard, 1);
 
-		Assert::AreEqual(static_cast<int>(HandValue::FourOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		Assert::AreEqual(static_cast<int>(HandValue::FourOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 	}
 
 	TEST_METHOD(TestFullHouse)
@@ -295,12 +318,18 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Check that we get the desired output
-		Assert::AreEqual(static_cast<int>(HandValue::FullHouse), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		uint64_t cardValue = 0;
+		uint64_t expectedCardValue = 0b00000000010000000010000000;
+		Assert::AreEqual(static_cast<int>(HandValue::FullHouse), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Change it so that there is no longer a Full House
+		cardValue = 0;
+		expectedCardValue = 0b0000010000000;
 		firstCard = std::make_pair(Suit::Diamonds, Value::Eight);
 		hand.addCardToHand(firstCard, 0);
-		Assert::AreNotEqual(static_cast<int>(HandValue::FullHouse), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		Assert::AreNotEqual(static_cast<int>(HandValue::FullHouse), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Add another Full House in a more complicated hand
 		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::Five), std::make_pair(Suit::Diamonds, Value::Nine),
@@ -309,13 +338,16 @@ public:
 		texasHoldemGame.setSharedCards(sharedCardsNew);
 
 		// Change the cards held in the hand
+		cardValue = 0;
+		expectedCardValue = 0b00000010000000000000001000;
 		firstCard = std::make_pair(Suit::Clubs, Value::Five);
 		secondCard = std::make_pair(Suit::Hearts, Value::Eight);
 		hand.addCardToHand(firstCard, 0);
 		hand.addCardToHand(secondCard, 1);
 
 		// Verify that the output is a full house
-		Assert::AreEqual(static_cast<int>(HandValue::FullHouse), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		Assert::AreEqual(static_cast<int>(HandValue::FullHouse), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 	}
 
 	TEST_METHOD(TestFlush)
@@ -340,12 +372,18 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Check that we get the desired output
-		Assert::AreEqual(static_cast<int>(HandValue::Flush), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		uint64_t cardValue = 0;
+		uint64_t expectedCardValue = 0b1010010011000;
+		Assert::AreEqual(static_cast<int>(HandValue::Flush), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Change it so that there is no longer a Full House
 		firstCard = std::make_pair(Suit::Clubs, Value::Eight);
 		hand.addCardToHand(firstCard, 0);
-		Assert::AreNotEqual(static_cast<int>(HandValue::Flush), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		cardValue = 0;
+		expectedCardValue = 0b00000000010001000010000000;
+		Assert::AreNotEqual(static_cast<int>(HandValue::Flush), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Add another Full House in a more complicated hand
 		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::Ace), std::make_pair(Suit::Diamonds, Value::Queen),
@@ -360,7 +398,10 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Verify that the output is a full house
-		Assert::AreEqual(static_cast<int>(HandValue::Flush), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		cardValue = 0;
+		expectedCardValue = 0b1111001000000;
+		Assert::AreEqual(static_cast<int>(HandValue::Flush), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 	}
 	TEST_METHOD(TestStraight)
 	{
@@ -384,12 +425,17 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Check that we get the desired output
-		Assert::AreEqual(static_cast<int>(HandValue::Straight), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
-
+		uint64_t cardValue = 0;
+		uint64_t expectedCardValue = 0b0000010000000;
+		Assert::AreEqual(static_cast<int>(HandValue::Straight), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
+		
 		// Change it so that there is no longer a Full House
+		cardValue = 0;
+		expectedCardValue = 0b00000000010001000010000000;
 		firstCard = std::make_pair(Suit::Clubs, Value::Ace);
 		hand.addCardToHand(firstCard, 0);
-		Assert::AreNotEqual(static_cast<int>(HandValue::Flush), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		Assert::AreNotEqual(static_cast<int>(HandValue::Flush), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
 
 		// Add another Full House in a more complicated hand
 		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::King), std::make_pair(Suit::Diamonds, Value::Queen),
@@ -404,7 +450,10 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Verify that the output is a full house
-		Assert::AreEqual(static_cast<int>(HandValue::Straight), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		cardValue = 0;
+		expectedCardValue = 0b1000000000000;
+		Assert::AreEqual(static_cast<int>(HandValue::Straight), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 	}
 
 	TEST_METHOD(TestThreeOfAKind)
@@ -429,12 +478,18 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Check that we get the desired output
-		Assert::AreEqual(static_cast<int>(HandValue::ThreeOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		uint64_t cardValue = 0;
+		uint64_t expectedCardValue = 0b00000100000001100000000000;
+		Assert::AreEqual(static_cast<int>(HandValue::ThreeOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Change it so that there is no longer a Full House
 		firstCard = std::make_pair(Suit::Clubs, Value::Ace);
 		hand.addCardToHand(firstCard, 0);
-		Assert::AreNotEqual(static_cast<int>(HandValue::ThreeOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		cardValue = 0;
+		expectedCardValue = 0b10000100000000100000000000;
+		Assert::AreNotEqual(static_cast<int>(HandValue::ThreeOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Add another Full House in a more complicated hand
 		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::King), std::make_pair(Suit::Diamonds, Value::Queen),
@@ -449,7 +504,10 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Verify that the output is a full house
-		Assert::AreEqual(static_cast<int>(HandValue::ThreeOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		cardValue = 0;
+		expectedCardValue = 0b01000000000001010000000000;
+		Assert::AreEqual(static_cast<int>(HandValue::ThreeOfAKind), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 	}
 
 	TEST_METHOD(TestTwoPair)
@@ -474,12 +532,18 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Check that we get the desired output
-		Assert::AreEqual(static_cast<int>(HandValue::TwoPair), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		uint64_t cardValue = 0;
+		uint64_t expectedCardValue = 0b00000100100001000000000000;
+		Assert::AreEqual(static_cast<int>(HandValue::TwoPair), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Change it so that there is no longer a Full House
+		cardValue = 0;
+		expectedCardValue = 0b00000100000001100000010000;
 		firstCard = std::make_pair(Suit::Clubs, Value::Two);
 		hand.addCardToHand(firstCard, 0);
-		Assert::AreNotEqual(static_cast<int>(HandValue::TwoPair), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		Assert::AreNotEqual(static_cast<int>(HandValue::TwoPair), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Add another Full House in a more complicated hand
 		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::King), std::make_pair(Suit::Clubs, Value::King),
@@ -488,13 +552,16 @@ public:
 		texasHoldemGame.setSharedCards(sharedCardsNew);
 
 		// Change the cards held in the hand
+		cardValue = 0;
+		expectedCardValue = 0b01000100000001000000000000;
 		firstCard = std::make_pair(Suit::Spades, Value::Nine);
 		secondCard = std::make_pair(Suit::Clubs, Value::Nine);
 		hand.addCardToHand(firstCard, 0);
 		hand.addCardToHand(secondCard, 1);
 
 		// Verify that the output is a full house
-		Assert::AreEqual(static_cast<int>(HandValue::TwoPair), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		Assert::AreEqual(static_cast<int>(HandValue::TwoPair), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 	}
 
 	TEST_METHOD(TestPair)
@@ -519,12 +586,18 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Check that we get the desired output
-		Assert::AreEqual(static_cast<int>(HandValue::Pair), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		uint64_t cardValue = 0;
+		uint64_t expectedCardValue = 0b00000000100001101000000000;
+		Assert::AreEqual(static_cast<int>(HandValue::Pair), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Change it so that there is no longer a Full House
 		firstCard = std::make_pair(Suit::Clubs, Value::Two);
 		hand.addCardToHand(firstCard, 0);
-		Assert::AreNotEqual(static_cast<int>(HandValue::Pair), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		cardValue = 0;
+		expectedCardValue = 0b1101010010000;
+		Assert::AreNotEqual(static_cast<int>(HandValue::Pair), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Add another Full House in a more complicated hand
 		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::King), std::make_pair(Suit::Clubs, Value::Queen),
@@ -539,7 +612,10 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Verify that the output is a full house
-		Assert::AreEqual(static_cast<int>(HandValue::Pair), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		cardValue = 0;
+		expectedCardValue = 0b00000100000001110000000000;
+		Assert::AreEqual(static_cast<int>(HandValue::Pair), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 	}
 
     TEST_METHOD(TestHighCard)
@@ -564,12 +640,18 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Check that we get the desired output
-		Assert::AreEqual(static_cast<int>(HandValue::HighCard), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		uint64_t cardValue = 0;
+		uint64_t expectedCardValue = 0b1101011000000;
+		Assert::AreEqual(static_cast<int>(HandValue::HighCard), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Change it so that there is no longer a Full House
 		secondCard = std::make_pair(Suit::Clubs, Value::Seven);
 		hand.addCardToHand(secondCard, 1);
-		Assert::AreNotEqual(static_cast<int>(HandValue::HighCard), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		cardValue = 0;
+		expectedCardValue = 0b0000010000000;
+		Assert::AreNotEqual(static_cast<int>(HandValue::HighCard), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 
 		// Add another Full House in a more complicated hand
 		std::array<Card, 5> sharedCardsNew{ std::make_pair(Suit::Diamonds, Value::King), std::make_pair(Suit::Clubs, Value::Queen),
@@ -584,7 +666,10 @@ public:
 		hand.addCardToHand(secondCard, 1);
 
 		// Verify that the output is a full house
-		Assert::AreEqual(static_cast<int>(HandValue::HighCard), static_cast<int>(texasHoldemGame.evaluateHand(hand)));
+		cardValue = 0;
+		expectedCardValue = 0b1111010000000;
+		Assert::AreEqual(static_cast<int>(HandValue::HighCard), static_cast<int>(texasHoldemGame.evaluateHand(hand, cardValue)));
+		Assert::AreEqual(expectedCardValue, cardValue);
 	}
 };
 

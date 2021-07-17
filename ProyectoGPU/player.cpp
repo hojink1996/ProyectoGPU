@@ -23,11 +23,15 @@ Hand Player::getHand()
 	return this->hand;
 }
 
+Decision Player::makeDecision()
+{
+	return this->decisionAgent.makeDecision(this->stack);
+}
+
 Decision Player::decide(float* state, int maxBet, int minBet)
 {
 	return this->decisionAgent.makeDecision(state, maxBet, minBet);
 }
-
 
 
 void Player::bet(int amount)
