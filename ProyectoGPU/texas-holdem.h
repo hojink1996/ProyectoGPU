@@ -77,12 +77,14 @@ private:
 	bool isThreeOfAKind(const std::vector<Value>& orderedCards);
 	bool isTwoPair(const std::vector<Value>& orderedCards);
 	bool isPair(const std::vector<Value>& orderedCards);
-	int determineWinner();
 public:
 	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier);
+	TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier);
+	void addPlayer(Player player);
 	HandValue evaluateHand(Hand& hand);
 	void setSharedCards(std::array<Card, 5>& sharedCards);
 	float* getState();
 	void play();
+	int determineWinner();
 };
 

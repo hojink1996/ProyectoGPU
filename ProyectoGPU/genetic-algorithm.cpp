@@ -21,16 +21,13 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents)
 
 int GeneticAlgorithm::compete(Player player1, Player player2, int idx1, int idx2)
 {
-	/*
-	* // Create a game of TexasHoldem
-	LinearAgent agent = LinearAgent();
-	Deck deck = Deck();
-	StraightIdentifier straightIdentifier = StraightIdentifier();
-	TexasHoldem texasHoldemGame = TexasHoldem(1, 100.0f, agent, deck, straightIdentifier);
-
-	*/
-	int randIdx = rand() % 2;
-	if (randIdx)
+	// Create a game of TexasHoldem
+	TexasHoldem game = TexasHoldem(Deck(), StraightIdentifier());
+	game.addPlayer(player1);
+	game.addPlayer(player2);
+	game.play();
+	int winnerIdx = game.determineWinner(); 
+	if (winnerIdx == 0)
 		return idx1;
 	return idx2;
 

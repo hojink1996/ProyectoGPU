@@ -15,6 +15,23 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAge
 		this->players.push_back(Player(startingStack, &decisionAgent));
 }
 
+/*
+Constructor without specifying number of players.
+*/
+TexasHoldem::TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier) : currentDeck(deck), straightIdentifier(straightIdentifier)
+{
+	this->numPlayers = 0;
+	this->dealerPosition = 0;
+	this->currentGameState = GameState::Invalid;
+	this->sharedCards = { invalidCard, invalidCard, invalidCard, invalidCard, invalidCard };
+}
+
+void TexasHoldem::addPlayer(Player player)
+{
+	this->numPlayers++;
+	this->players.push_back(player);
+}
+
 void TexasHoldem::resetDeck()
 {
 	this->currentDeck.reset();
@@ -219,6 +236,7 @@ int TexasHoldem::determineWinner()
 		}
 		// TODO: Get the winning player by comparing the hand value, and if the hand value is the same
 		// we need a way to compare the hands for the players.
+		return 0;
 	}
 	else
 		return -1;
@@ -300,8 +318,10 @@ float* TexasHoldem::getState() {
 	return state;
 }
 
+
 void TexasHoldem::play()
 {
+	/*
 	this->resetDeck();
 
 	// Small Blind
@@ -321,7 +341,8 @@ void TexasHoldem::play()
 	while (numberOfEqualBets != this->numPlayers)
 	{
 		// TODO: what if a player folds?
-		Decision decision = this->players[idx % this->numPlayers].decide(this->stateVector, this->maxBet, this->minBet);
+		int currentIdx = idx % this->numPlayers;
+		Decision decision = this->players[currentIdx].decide(this->stateVector, this->maxBet, this->minBet);
 		if (decision.betAmount == firstBet)
 		{
 			numberOfEqualBets++;
@@ -333,4 +354,5 @@ void TexasHoldem::play()
 		}
 		idx++;
 	}
+	*/
 }
