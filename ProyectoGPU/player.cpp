@@ -87,3 +87,8 @@ void Player::addPlayerEarnings(int earnings, int startingStack)
 {
 	this->playerEarnings.push_back(earnings + this->stack - startingStack);
 }
+
+std::vector<int> Player::getPlayerEarnings()
+{
+	return this->playerEarnings;
+}

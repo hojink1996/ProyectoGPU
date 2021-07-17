@@ -55,6 +55,15 @@ public:
 	*/
 	void decreaseStackSize(int decreaseValue);
 
+	/*
+	Functions used to get the history of player earnings (or losses, which are represented as "negative earnings")
+	once the playing rounds are over.
+	
+	@return:		A vector of length 'n', with 'n' being the number of rounds played by the player.
+					Each element in the vector represents the player's earning during one of these rounds.
+	*/
+	std::vector<int> getPlayerEarnings();
+
 	void bet(int amount);
 	void setPlayerStack(int newStack);
 	void registerWin();
