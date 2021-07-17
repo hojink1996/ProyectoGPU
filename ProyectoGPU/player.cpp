@@ -1,5 +1,6 @@
 #include "card.h"
 #include "player.h"
+#include <cassert>
 
 Player::Player(int startingStack, Agent* decisionAgent) : decisionAgent(*decisionAgent)
 {
@@ -23,16 +24,15 @@ Hand Player::getHand()
 	return this->hand;
 }
 
-Decision Player::makeDecision()
+Decision Player::makeDecision(int minimumBet, int currentBetValue)
 {
-	return this->decisionAgent.makeDecision(this->stack);
+	return this->decisionAgent.makeDecision(minimumBet, this->stack - currentBetValue);
 }
 
 Decision Player::decide(float* state, int maxBet, int minBet)
 {
 	return this->decisionAgent.makeDecision(state, maxBet, minBet);
 }
-
 
 void Player::bet(int amount)
 {
@@ -69,4 +69,21 @@ float* Player::getStrategy()
 int Player::getStrategySize()
 {
 	return this->decisionAgent.getThetaSize();
+}
+
+void Player::setPlayerStack(int newStack)
+{
+	this->stack = newStack;
+}
+
+
+void Player::decreaseStackSize(int decreaseValue)
+{
+	this->stack -= decreaseValue;
+	assert(this->stack >= 0);
+}
+
+void Player::addPlayerEarnings(int earnings, int startingStack)
+{
+	this->playerEarnings.push_back(earnings + this->stack - startingStack);
 }

@@ -40,17 +40,6 @@ Decision RandomAgent::makeDecision(float* state, float maxBet, float minBet)
 	return decision;
 }
 
-float* RandomAgent::getTheta()
-{
-	float theta[1];
-	return theta;
-}
-
-int RandomAgent::getThetaSize()
-{
-	return 0;
-}
-
 LinearAgent::LinearAgent(int thetaSize)
 {
 	this->thetaSize = thetaSize;

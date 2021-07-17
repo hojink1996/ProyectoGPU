@@ -53,28 +53,28 @@ private:
 	Deck& currentDeck;
 	StraightIdentifier& straightIdentifier;
 	GameState currentGameState;
-	int maxBet = 500;
-	int minBet = 1;
-	int smallBlind = 1;
-	int bigBlind = 2;
+	int startingStack{};
+	int minBet;
+	int smallBlind;
+	int bigBlind;
 	int currentTotalBetAmount = 0;
 	float* stateVector;
 	int numPlayers{ 0 };
+	int currentlyPlayingPlayers{ 0 };
 	int dealerPosition{ 0 };
+	std::vector<bool> playerCurrentlyPlaying{};
 	std::vector<Player> players;
-	std::pair<Suit, Value> getNextCard();
 	std::array<Card, 5> sharedCards;
-	uint64_t computeCardValue(Value cardValue, int shiftedBitPositions);
-	void bettingRound();
 
 	/*
 	Functions used to reset the state of the game once the playing round is over.
 
 	Use 'endRound()' which calls 'resetDeck()', 'resetSharedCards()' and 'resetPlayerCards()'.
 	*/
+	void beginRound();
 	void resetDeck();
 	void resetSharedCards();
-	void resetPlayerCards();
+	void resetPlayers();
 	void endRound();
 
 	/*
@@ -88,14 +88,15 @@ private:
 	The 'dealCards()' function begins the pre-flop stage. Once the betting is done, the 'drawFlop()' function is used to
 	pass to the flop. Then the 'drawTurn()' function is used to pass to the turn. Finally, the 'drawRiver()' function is used
 	to pass to the last stage of the game.
+
+	The 'bettingRound()' functions contains all of the logic for the betting between the players in the game.
 	*/
 	void dealCards();
 	void drawFlop();
 	void drawTurn();
 	void drawRiver();
+	void bettingRound();
 
-	void updateFullHouse(int currentLength, bool& hasPair, bool& hasThreeOfAKind, Value& threeOfAKindValue,
-		Value& pairValue, Value& currentCardValue);
 
 	/*
 	Functions used to evaluate whether a hand meets the requirements for a specific type of hand value.
@@ -142,17 +143,35 @@ private:
 	Function used to determine the winner for the current round of the game. This function can only be called
 	once the 'drawRiver()' step of the game is called. This guarantees that each player has two cards in their
 	hands and that there are five shared cards.
+
+	@return:	A vector with the indices of the winning players.
 	*/
-	int determineWinner();
+	std::vector<int> determineWinner();
+
+	/*
+	Function used to assign the earnings of the round to the respective winning players.
+	It takes the whole pot and divides it between the winning players (given by the 'winningPlayers' vector).
+	
+	@param winningPlayers:		A vector with the indices of the winning players.
+	*/
+	void assignEarningsToWinner(std::vector<int> winningPlayers);
+
+	/*
+	Additional auxiliary functions used.
+	*/
+	void updateFullHouse(int currentLength, bool& hasPair, bool& hasThreeOfAKind, Value& threeOfAKindValue,
+		Value& pairValue, Value& currentCardValue);
+	std::pair<Suit, Value> getNextCard();
+	uint64_t computeCardValue(Value cardValue, int shiftedBitPositions);
 public:
-	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier);
-	TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier);
+	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier,
+		int smallBlindValue=1);
+	TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, int smallBlindValue=1);
 	HandValue evaluateHand(Hand& hand, uint64_t& handValue);
 	void addPlayer(Player player);
 	void setSharedCards(std::array<Card, 5>& sharedCards);
 	void playRound();
 	float* getState();
-	void play();
 	void playMultipleRounds(int numberOfRounds);
 };
 

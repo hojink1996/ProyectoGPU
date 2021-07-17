@@ -16,8 +16,7 @@ protected:
 	
 public:
 	virtual Decision makeDecision(float* state, float maxBet, float minBet) = 0;
-	virtual float* getTheta() = 0;
-	virtual int getThetaSize() = 0;
+	virtual Decision makeDecision(int minimumBet, int maximumBet) = 0;
 };
 
 /*
@@ -29,8 +28,6 @@ private:
 public:
 	RandomAgent();
 	Decision makeDecision(float* state, float maxBet, float minBet);
-	float* getTheta();
-	int getThetaSize();
 };
 
 /*
