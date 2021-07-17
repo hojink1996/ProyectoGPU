@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+ProyectoGPU/ProyectoGPU.vcxproj 
+ProyectoGPU/ProyectoGPU.vcxproj.filters
+enc_temp_folder/*
+
 # User-specific files
 *.rsuser
 *.suo

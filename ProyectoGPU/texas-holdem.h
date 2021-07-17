@@ -53,6 +53,12 @@ private:
 	Deck& currentDeck;
 	StraightIdentifier& straightIdentifier;
 	GameState currentGameState;
+	int maxBet = 500;
+	int minBet = 1;
+	int smallBlind = 1;
+	int bigBlind = 2;
+	int currentTotalBetAmount = 0;
+	float* stateVector;
 	int numPlayers{ 0 };
 	int dealerPosition{ 0 };
 	std::vector<Player> players;
@@ -140,9 +146,13 @@ private:
 	int determineWinner();
 public:
 	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier);
+	TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier);
 	HandValue evaluateHand(Hand& hand, uint64_t& handValue);
+	void addPlayer(Player player);
 	void setSharedCards(std::array<Card, 5>& sharedCards);
 	void playRound();
+	float* getState();
+	void play();
 	void playMultipleRounds(int numberOfRounds);
 };
 

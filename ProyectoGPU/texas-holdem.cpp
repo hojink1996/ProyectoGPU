@@ -1,6 +1,7 @@
 #include "texas-holdem.h"
 #include "deck.h"
 #include "player.h"
+#include <algorithm>
 #include <vector>
 #include <cstdint>
 #include <cassert>
@@ -13,7 +14,24 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAge
 	this->numPlayers = numPlayers;
 	this->sharedCards = { invalidCard, invalidCard, invalidCard, invalidCard, invalidCard };
 	for (int i = 0; i < numPlayers; ++i)
-		this->players.push_back(Player(startingStack, decisionAgent));
+		this->players.push_back(Player(startingStack, &decisionAgent));
+}
+
+/*
+Constructor without specifying number of players.
+*/
+TexasHoldem::TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier) : currentDeck(deck), straightIdentifier(straightIdentifier)
+{
+	this->numPlayers = 0;
+	this->dealerPosition = 0;
+	this->currentGameState = GameState::Invalid;
+	this->sharedCards = { invalidCard, invalidCard, invalidCard, invalidCard, invalidCard };
+}
+
+void TexasHoldem::addPlayer(Player player)
+{
+	this->numPlayers++;
+	this->players.push_back(player);
 }
 
 void TexasHoldem::resetDeck()
@@ -473,7 +491,6 @@ int TexasHoldem::determineWinner()
 			winningHandValue = handValue;
 			winningIndex = currentIndex;
 		}
-	}
 	assert(winningIndex >= 0);
 	
 	return winningIndex;
@@ -594,4 +611,12 @@ void TexasHoldem::bettingRound()
 		}
 		++currentPosition;
 	}
+
+float* TexasHoldem::getState() {
+	float state[2] = {
+		static_cast<float>(this->currentGameState),
+		this->minBet
+	};
+	return state;
 }
+

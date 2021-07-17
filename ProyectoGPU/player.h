@@ -11,14 +11,28 @@ receiving cards in the game, resetting the hand and making decisions by the user
 class Player
 {
 private:
-	float stack;
+	int stack;
 	Hand& hand{ Hand() };
 	float lastBet{ 0.0f };
 	Agent& decisionAgent;
+
+	int numPlayedGames;
+	int numWins;
+
 public:
-	Player(float startingStack, Agent& decisionAgent);
+	Player(int startingStack, Agent* decisionAgent);
 	void addCardToHand(Card card, int position);
 	void resetHand();
 	Hand getHand();
 	Decision makeDecision();
+	void bet(int amount);
+	Decision decide(float* state, int maxBet, int minBet);
+
+	void registerWin();
+	void addPlayedGame();
+	int  getNumPlayedGames();
+	int getNumWins();
+
+	float* getStrategy();
+	int getStrategySize();
 };
