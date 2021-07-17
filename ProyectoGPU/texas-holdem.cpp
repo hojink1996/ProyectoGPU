@@ -491,6 +491,7 @@ int TexasHoldem::determineWinner()
 			winningHandValue = handValue;
 			winningIndex = currentIndex;
 		}
+	}
 	assert(winningIndex >= 0);
 	
 	return winningIndex;
@@ -611,6 +612,7 @@ void TexasHoldem::bettingRound()
 		}
 		++currentPosition;
 	}
+}
 
 float* TexasHoldem::getState() {
 	float state[2] = {
