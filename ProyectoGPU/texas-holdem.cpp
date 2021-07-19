@@ -7,7 +7,7 @@
 #include <cassert>
 
 TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck,
-	StraightIdentifier& straightIdentifier, int smallBlindValue = 1) : currentDeck(deck), straightIdentifier(straightIdentifier)
+	StraightIdentifier& straightIdentifier, int smallBlindValue) : currentDeck(deck), straightIdentifier(straightIdentifier)
 {
 	this->startingStack = startingStack;
 	this->dealerPosition = 0;
@@ -29,7 +29,7 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAge
 Constructor without specifying number of players.
 */
 TexasHoldem::TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, 
-	int smallBlindValue=1) : currentDeck(deck), straightIdentifier(straightIdentifier)
+	int smallBlindValue) : currentDeck(deck), straightIdentifier(straightIdentifier)
 {
 	this->startingStack = startingStack;
 	this->numPlayers = 0;
@@ -704,11 +704,11 @@ void TexasHoldem::bettingRound()
 	}
 }
 
-float* TexasHoldem::getState() {
-	float state[2] = {
-		static_cast<float>(this->currentGameState),
-		this->minBet
-	};
+std::vector<float> TexasHoldem::getState() {
+	std::vector<float> state;
+	state.push_back(static_cast<float>(this->currentGameState));
+	state.push_back(this->minBet);
+	
 	return state;
 }
 

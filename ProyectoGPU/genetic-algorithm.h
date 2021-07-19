@@ -1,23 +1,23 @@
 #pragma once
 #include <vector>
-#include "player.h"
+#include "individual.h"
 
 
 class GeneticAlgorithm
 {
 private:
-	int numIndividuals, numOpponents;
-	std::vector<Player> newIndividuals;
-	int compete(Player player1, Player player2, int idx1, int idx2);
+	int numIndividuals, numOpponents, numGamesPerPair;
+	std::vector<Individual> newIndividuals;
+	void compete(Individual player1, Individual player2);
 
 public:
-	GeneticAlgorithm(int iniNumIndividuals, int numOpponents);
+	GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair=10);
 	void evaluate();
 	void selectBest(float ratio);
 	void crossOver();
 	void mutate(float probab);
 
 	int getNumIndividuals();
-	float* getIndividualStrategyByIndex(int idx);
-	std::vector<Player> currentIndividuals;
+	std::vector<float> getIndividualStrategyByIndex(int idx);
+	std::vector<Individual> currentIndividuals;
 };

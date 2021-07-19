@@ -47,8 +47,7 @@ void main()
 	// Assert all individuals competed 'numOpponents' times
 	for (int i = 0; i < ga.getNumIndividuals(); i++)
 	{
-		cout << ga.currentIndividuals[i].getNumPlayedGames() << endl;
-		totalWin += ga.currentIndividuals[i].getNumWins();
+		cout << ga.currentIndividuals[i].getNumPlayedCompetitions() << endl;
 	}
 
 	cout << "Total win: " << totalWin << endl;

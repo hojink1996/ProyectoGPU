@@ -15,8 +15,9 @@ private:
 protected:
 	
 public:
-	virtual Decision makeDecision(float* state, float maxBet, float minBet) = 0;
-	virtual Decision makeDecision(int minimumBet, int maximumBet) = 0;
+	virtual Decision makeDecision(std::vector<float> state, float minRaise) = 0;
+	// virtual Decision makeDecision(int minimumBet, int maximumBet) = 0;
+	virtual std::vector<float> getTheta();
 };
 
 /*
@@ -27,7 +28,8 @@ class RandomAgent : public Agent
 private:
 public:
 	RandomAgent();
-	Decision makeDecision(float* state, float maxBet, float minBet);
+	Decision makeDecision(std::vector<float> state, float minRaise);
+	std::vector<float> getTheta();
 };
 
 /*
@@ -37,15 +39,15 @@ class LinearAgent : public Agent
 {
 private:
 	int thetaSize;
-	float* theta;  // first 10 is for action, last 10 is for amount
+	std::vector<float> theta;
 
-	bool compute_fold(float* state);
-	float compute_amount(float* state);
+	bool computeFold(std::vector<float> state);
+	bool computeCall(std::vector<float> state);
+	float computeAmount(std::vector<float> state);
 public:
 	LinearAgent(int thetaSize);
-	Decision makeDecision(float* state, float maxBet, float minBet);
+	Decision makeDecision(std::vector<float> state, float minRaise);
 
 	void printTheta();
-	float* getTheta();
-	int getThetaSize();
+	std::vector<float> getTheta();
 };

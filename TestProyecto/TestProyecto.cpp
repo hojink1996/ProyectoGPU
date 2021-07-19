@@ -682,7 +682,7 @@ public:
 		LinearAgent agent = LinearAgent(20);
 
 		// State of all 0s should return a decision of Call
-		float state[10] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+		std::vector<float> state = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 		float maxBet = 10.0f;
 		float minBet = 1.0f;
 		Decision decision = agent.makeDecision(state, maxBet, minBet);

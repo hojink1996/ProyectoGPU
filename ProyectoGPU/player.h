@@ -16,8 +16,6 @@ private:
 	float lastBet{ 0.0f };
 	Agent& decisionAgent;
 
-	int numPlayedGames;
-	int numWins;
 	std::vector<int> playerEarnings{};
 public:
 	Player(int startingStack, Agent* decisionAgent);
@@ -35,7 +33,7 @@ public:
 	@return:				A decision structure that contains the information of the decision made by the player.
 	*/
 	Decision makeDecision(int minimumBet, int currentBetValue);
-	Decision decide(float* state, int maxBet, int minBet);
+	Decision decide(std::vector<float> state, int minBet);
 
 	/*
 	Function used to add the player earnings during a round. The function takes the amount of money earned and the amount of money
@@ -66,11 +64,7 @@ public:
 
 	void bet(int amount);
 	void setPlayerStack(int newStack);
-	void registerWin();
-	void addPlayedGame();
-	int getNumPlayedGames();
-	int getNumWins();
 
-	float* getStrategy();
-	int getStrategySize();
+	std::vector<float> getStrategy();
+	Agent& getAgent();
 };
