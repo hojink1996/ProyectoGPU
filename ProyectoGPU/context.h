@@ -5,8 +5,7 @@
 class Context
 {
 private:
-	GeneticAlgorithm& geneticAlgorithm;
 public:
-	Context(GeneticAlgorithm* ga);
+	Context();
 	void run();
 };

@@ -153,3 +153,20 @@ Individual GeneticAlgorithm::getIndividualByIndex(int idx)
 {
 	return this->currentIndividuals.at(idx);
 }
+
+void GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
+{
+	std::cout << "Evaluating..." << std::endl;
+	this->evaluate();
+
+	std::cout << "Selecting best individuals..." << std::endl;
+	this->selectBest(selectBestRatio);
+
+	std::cout << "Crossing over..." << std::endl;
+	this->crossOver();
+
+	std::cout << "Mutating..." << std::endl;
+	this->mutate(mutateProbab);
+}
+
+

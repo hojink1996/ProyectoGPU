@@ -21,4 +21,6 @@ public:
 	int getNumIndividuals();
 	std::vector<float> getIndividualStrategyByIndex(int idx);
 	Individual getIndividualByIndex(int idx);
+
+	void trainOneEpoch(float selectBestRatio, float mutateProbab);
 };
