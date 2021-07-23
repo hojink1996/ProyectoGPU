@@ -86,3 +86,8 @@ void Player::mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMuta
 {
 	this->decisionAgent.mutateStrategyElementByIndexVector(indexesToBeMutated);
 }
+
+int Player::getStack()
+{
+	return this->stack;
+}

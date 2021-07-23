@@ -14,6 +14,16 @@ using namespace std;
 
 void main()
 {
+	LinearAgent* agent = new LinearAgent(2);
+	Player* player = new Player(10, *agent);
+	Individual individual = Individual(*player);
+
+	std::vector<Player> vector;
+	vector.push_back(individual.getPlayer());
+	vector.at(0).addPlayerEarnings(1, 2);
+
+	cout << "" << endl;
+
 	/*
 	LinearAgent agent;
 	agent.initialize_theta();
@@ -31,7 +41,7 @@ void main()
 
 	cout << "Amount: " << decision.betAmount << endl;
 
-	*/
+	
 	
 	LinearAgent agent = LinearAgent(20);
 
@@ -57,6 +67,7 @@ void main()
 
 	ga.crossOver();
 	ga.mutate(0.5);
+	*/
 
 	return;
 }

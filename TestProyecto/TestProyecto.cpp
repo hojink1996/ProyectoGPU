@@ -694,8 +694,8 @@ public:
 		float minRaise = 1.0f;
 		Decision decision = agent.makeDecision(state, minRaise, maxRaise);
 
-		Assert::AreEqual(static_cast<int>(decision.play), static_cast<int>(Play::Raise));
-		Assert::AreEqual(static_cast<int>(decision.betAmount), static_cast<int>(minRaise));
+		Assert::AreEqual(static_cast<int>(decision.play), static_cast<int>(Play::Fold));
+		Assert::AreEqual(static_cast<int>(decision.betAmount), 0);
 	}
 
 };
@@ -707,7 +707,7 @@ TEST_CLASS(TestGeneticAlgorithm)
 public:
 	TEST_METHOD(TestEvaluation)
 	{
-		int iniNumIndividuals = 4;
+		int iniNumIndividuals = 2;
 		int numOpponents = 2;
 		int numGamesPerPair = 2;
 		GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair);

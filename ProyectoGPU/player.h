@@ -69,4 +69,6 @@ public:
 	Agent& getAgent();
 	void assignStrategy(std::vector<float> strategy, int idx);
 	void mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated);
+
+	int getStack();
 };

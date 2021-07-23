@@ -8,7 +8,7 @@
 
 GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair)
 {
-	assert(iniNumIndividuals > 2);
+	assert(iniNumIndividuals > 1);
 	assert(numOpponents > 0);
 
 	this->numIndividuals = iniNumIndividuals;
@@ -28,7 +28,7 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 void GeneticAlgorithm::compete(Individual individual1, Individual individual2)
 {
 	// Create a game of TexasHoldem
-	TexasHoldem game = TexasHoldem(Deck(), StraightIdentifier());
+	TexasHoldem game = TexasHoldem(Deck(), StraightIdentifier(), 2.0f);
 	game.addPlayer(individual1.getPlayer());
 	game.addPlayer(individual2.getPlayer());
 	game.playMultipleRounds(this->numGamesPerPair);
@@ -52,13 +52,13 @@ void GeneticAlgorithm::evaluate()
 			// Sample a random opponent
 			int randIdx = rand() % this->numIndividuals;
 
-			// Resample if is the same player as i or if the sampled player already played numOpponents times
+			// Resample if it's the same player as i or if the sampled player already played numOpponents times
 			while (randIdx == i || (this->currentIndividuals[randIdx].getNumPlayedCompetitions() >= this->numOpponents))
 			{
 				randIdx = rand() % this->numIndividuals;
 			}
 
-			// Make individuals compete
+			// Let individuals compete
 			this->compete(this->currentIndividuals[i], this->currentIndividuals[randIdx]);
 			
 			// Update individuals' score after the competition

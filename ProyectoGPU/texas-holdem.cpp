@@ -28,7 +28,7 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAge
 /*
 Constructor without specifying number of players.
 */
-TexasHoldem::TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, 
+TexasHoldem::TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, float startingStack,
 	int smallBlindValue) : currentDeck(deck), straightIdentifier(straightIdentifier)
 {
 	this->startingStack = startingStack;
@@ -42,7 +42,7 @@ TexasHoldem::TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier,
 	this->minBet = smallBlindValue;
 }
 
-void TexasHoldem::addPlayer(Player player)
+void TexasHoldem::addPlayer(Player& player)
 {
 	this->numPlayers++;
 	this->players.push_back(player);
@@ -98,10 +98,10 @@ void TexasHoldem::resetSharedCards()
 
 void TexasHoldem::resetPlayers()
 {
-	for (auto player : this->players)
+	for (int i=0; i<this->numPlayers; i++)
 	{
-		player.resetHand();
-		player.setPlayerStack(this->startingStack);
+		this->players[i].resetHand();
+		this->players[i].setPlayerStack(this->startingStack);
 	}
 }
 
@@ -116,6 +116,13 @@ void TexasHoldem::beginRound()
 }
 void TexasHoldem::endRound()
 {
+	/*
+	// Players that ended up with empty stack are not playing anymore
+	for (int index = 0; index < this->playerCurrentlyPlaying.size(); ++index)
+	{
+		this->playerCurrentlyPlaying.at(index) = false;
+	}
+	*/
 	this->resetDeck();
 	this->resetPlayers();
 	this->resetSharedCards();
@@ -526,6 +533,7 @@ std::vector<int> TexasHoldem::determineWinner()
 			else if (handValue == winningHandValue)
 				winningIndex.push_back(currentIndex);
 		}
+		currentIndex++;
 	}
 	for(int index: winningIndex)
 		assert(index >= 0);
@@ -540,6 +548,7 @@ void TexasHoldem::assignEarningsToWinner(std::vector<int> winningPlayers)
 	int totalEarningsPerPlayer = this->currentTotalBetAmount / winningPlayers.size();
 	for (int playerIndex = 0; playerIndex < this->numPlayers; ++playerIndex)
 	{
+		// Find playerIdx in winningPlayers
 		if(std::find(winningPlayers.begin(), winningPlayers.end(), playerIndex) != winningPlayers.end())
 			this->players.at(playerIndex).addPlayerEarnings(totalEarningsPerPlayer, this->startingStack);
 		else
@@ -624,11 +633,14 @@ void TexasHoldem::playRound()
 	this->dealCards();
 	this->bettingRound();
 	this->drawFlop();
-	this->bettingRound();
+	if (!this->allPlayersAllIn())
+		this->bettingRound();
 	this->drawTurn();
-	this->bettingRound();
+	if (!this->allPlayersAllIn())
+		this->bettingRound();
 	this->drawRiver();
-	this->bettingRound();
+	if (!this->allPlayersAllIn())
+		this->bettingRound();
 	std::vector<int> winnerIndex = this->determineWinner();
 	this->assignEarningsToWinner(winnerIndex);
 	this->endRound();
@@ -638,6 +650,20 @@ void TexasHoldem::playMultipleRounds(int numberOfRounds)
 {
 	for (int round = 0; round < numberOfRounds; ++round)
 		this->playRound();
+}
+
+bool TexasHoldem::allPlayersAllIn()
+{
+	// Return true if all players have all in, false otherwise
+	for (int i = 0; i < this->players.size(); i++)
+	{
+		if (this->playerCurrentlyPlaying.at(i) && this->players[i].getStack() > 0.0f)
+		{
+			return false;
+		}
+	}
+	return true;
+	
 }
 
 void TexasHoldem::bettingRound()
@@ -655,7 +681,7 @@ void TexasHoldem::bettingRound()
 	}
 	else
 		betStartingPosition = (this->dealerPosition - 1) % (this->numPlayers);
-	lastBetPosition = (betStartingPosition - 1) % (this->numPlayers);
+	lastBetPosition = (betStartingPosition - 1 + this->numPlayers) % (this->numPlayers);
 	int currentPosition = betStartingPosition;
 
 	while (true)
@@ -670,12 +696,12 @@ void TexasHoldem::bettingRound()
 			{
 				currentBetValue += currentPlayerDecision.betAmount;
 				soFarBetValue += currentPlayerDecision.betAmount;
-				currentPlayerBets.at(currentPosition) = currentBetValue;
+				currentPlayerBets.at(currentPosition) += currentBetValue;
 				lastBetPosition = (currentPosition - 1) % (this->numPlayers);
 			}
 			else if (currentPlayerDecision.play == Play::Call)
 			{
-				currentPlayerBets.at(currentPosition) = currentBetValue;
+				currentPlayerBets.at(currentPosition) += currentBetValue;
 				if (lastBetPosition == currentPosition)
 					break;
 			}
