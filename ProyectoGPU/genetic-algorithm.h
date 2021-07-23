@@ -8,6 +8,7 @@ class GeneticAlgorithm
 private:
 	int numIndividuals, numOpponents, numGamesPerPair;
 	std::vector<Individual> newIndividuals;
+	std::vector<Individual> currentIndividuals;
 	void compete(Individual player1, Individual player2);
 
 public:
@@ -19,5 +20,5 @@ public:
 
 	int getNumIndividuals();
 	std::vector<float> getIndividualStrategyByIndex(int idx);
-	std::vector<Individual> currentIndividuals;
+	Individual getIndividualByIndex(int idx);
 };

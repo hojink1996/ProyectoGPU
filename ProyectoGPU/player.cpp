@@ -2,7 +2,7 @@
 #include "player.h"
 #include <cassert>
 
-Player::Player(int startingStack, Agent* decisionAgent) : decisionAgent(*decisionAgent)
+Player::Player(int startingStack, Agent& decisionAgent) : decisionAgent(decisionAgent)
 {
 	this->stack = startingStack;
 }
@@ -23,15 +23,18 @@ Hand Player::getHand()
 }
 
 /*
+
 Decision Player::makeDecision(int minimumBet, int currentBetValue)
 {
 	return this->decisionAgent.makeDecision(minimumBet, this->stack - currentBetValue);
 }
+
 */
 
-Decision Player::decide(std::vector<float> state, int minBet)
+Decision Player::decide(std::vector<float> state, int minBet, int currentBetValue)
 {
-	return this->decisionAgent.makeDecision(state, minBet);
+	Decision decision = this->decisionAgent.makeDecision(state, minBet, this->stack - currentBetValue);
+	return decision;
 }
 
 void Player::bet(int amount)
@@ -44,6 +47,7 @@ Agent& Player::getAgent()
 {
 	return this->decisionAgent;
 }
+
 
 std::vector<float> Player::getStrategy()
 {
@@ -70,4 +74,15 @@ void Player::addPlayerEarnings(int earnings, int startingStack)
 std::vector<int> Player::getPlayerEarnings()
 {
 	return this->playerEarnings;
+}
+
+
+void Player::assignStrategy(std::vector<float> strategy, int idx)
+{
+	this->decisionAgent.assignStrategy(strategy, idx);
+}
+
+void Player::mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated)
+{
+	this->decisionAgent.mutateStrategyElementByIndexVector(indexesToBeMutated);
 }

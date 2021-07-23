@@ -13,4 +13,6 @@ public:
 	Player& getPlayer();
 	void updateScore();
 	float getScore();
+	void crossOver(std::vector<float> strategy, int idx);
+	void mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated);
 };

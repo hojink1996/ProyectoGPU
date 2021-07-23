@@ -18,7 +18,7 @@ private:
 
 	std::vector<int> playerEarnings{};
 public:
-	Player(int startingStack, Agent* decisionAgent);
+	Player(int startingStack, Agent& decisionAgent);
 	void addCardToHand(Card card, int position);
 	void resetHand();
 	Hand getHand();
@@ -32,8 +32,8 @@ public:
 							is equivalent to betting the rest of the remaining money.
 	@return:				A decision structure that contains the information of the decision made by the player.
 	*/
-	Decision makeDecision(int minimumBet, int currentBetValue);
-	Decision decide(std::vector<float> state, int minBet);
+	//Decision makeDecision(int minimumBet, int currentBetValue);
+	Decision decide(std::vector<float> state, int minBet, int currentBetValue);
 
 	/*
 	Function used to add the player earnings during a round. The function takes the amount of money earned and the amount of money
@@ -67,4 +67,6 @@ public:
 
 	std::vector<float> getStrategy();
 	Agent& getAgent();
+	void assignStrategy(std::vector<float> strategy, int idx);
+	void mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated);
 };

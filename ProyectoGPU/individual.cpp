@@ -17,9 +17,19 @@ int Individual::getNumPlayedCompetitions()
 	return this->numPlayedCompetitions;
 }
 
+void Individual::crossOver(std::vector<float> strategy, int idx)
+{
+	this->player.assignStrategy(strategy, idx);
+}
+
 Player& Individual::getPlayer()
 {
 	return this->player;
+}
+
+void Individual::mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated)
+{
+	this->player.mutateStrategyElementByIndexVector(indexesToBeMutated);
 }
 
 float Individual::getScore()

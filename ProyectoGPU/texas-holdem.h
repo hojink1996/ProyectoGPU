@@ -171,7 +171,7 @@ public:
 	void addPlayer(Player player);
 	void setSharedCards(std::array<Card, 5>& sharedCards);
 	void playRound();
-	std::vector<float> getState();
+	std::vector<float> getStateOfPlayer(int idx);
 	void playMultipleRounds(int numberOfRounds);
 };
 

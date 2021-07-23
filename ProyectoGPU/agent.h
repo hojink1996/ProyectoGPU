@@ -15,9 +15,11 @@ private:
 protected:
 	
 public:
-	virtual Decision makeDecision(std::vector<float> state, float minRaise) = 0;
+	virtual Decision makeDecision(std::vector<float> state, float minRaise, float maxRaise) = 0;
 	// virtual Decision makeDecision(int minimumBet, int maximumBet) = 0;
-	virtual std::vector<float> getTheta();
+	virtual std::vector<float> getTheta() = 0;
+	virtual void assignStrategy(std::vector<float> strategy, int idx) = 0;
+	virtual void mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated) = 0;
 };
 
 /*
@@ -28,8 +30,10 @@ class RandomAgent : public Agent
 private:
 public:
 	RandomAgent();
-	Decision makeDecision(std::vector<float> state, float minRaise);
+	Decision makeDecision(std::vector<float> state, float minRaise, float maxRaise);
 	std::vector<float> getTheta();
+	void assignStrategy(std::vector<float> strategy, int idx);
+	void mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated);
 };
 
 /*
@@ -38,7 +42,6 @@ LinearAgent: Agent that makes decision given a linear combination with its param
 class LinearAgent : public Agent
 {
 private:
-	int thetaSize;
 	std::vector<float> theta;
 
 	bool computeFold(std::vector<float> state);
@@ -46,8 +49,10 @@ private:
 	float computeAmount(std::vector<float> state);
 public:
 	LinearAgent(int thetaSize);
-	Decision makeDecision(std::vector<float> state, float minRaise);
+	Decision makeDecision(std::vector<float> state, float minRaise, float maxRaise);
 
 	void printTheta();
 	std::vector<float> getTheta();
+	void assignStrategy(std::vector<float> strategy, int idx);
+	void mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated);
 };

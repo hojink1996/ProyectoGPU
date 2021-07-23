@@ -15,12 +15,12 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 	this->numOpponents = numOpponents;
 	this->numGamesPerPair = numGamesPerPair;
 
-	int startingStack = 1000;	
+	int startingStack = 2;	
 	for (int i = 0; i < this->numIndividuals; i++) 
 	{
-		LinearAgent* agent = new LinearAgent(20);
-		Player player = Player(startingStack, agent);
-		this->currentIndividuals.push_back(Individual(player));
+		LinearAgent* agent = new LinearAgent(2);
+		Player* player = new Player(startingStack, *agent);
+		this->currentIndividuals.push_back(Individual(*player));
 	}
 }
 
@@ -111,13 +111,8 @@ void GeneticAlgorithm::crossOver()
 		std::vector<float> strategy2 = this->currentIndividuals[i + 1].getPlayer().getStrategy();
 
 		int crossOverIdx = rand() % (strategy1.size());
-
-		for (int j = crossOverIdx; j < strategy1.size(); j++)
-		{
-			float aux = strategy1[j];
-			strategy1[j] = strategy2[j];
-			strategy2[j] = aux;
-		}
+		this->currentIndividuals[i].crossOver(strategy2, crossOverIdx);
+		this->currentIndividuals[i + 1].crossOver(strategy1, crossOverIdx);
 	}
 }
 
@@ -130,14 +125,16 @@ void GeneticAlgorithm::mutate(float probab)
 	{
 		std::vector<float> strategy = this->currentIndividuals[i].getPlayer().getStrategy();
 
+		std::vector<int> indexesToBeMutated = {};
 		// Iterate over elements of the strategy array
 		for (int j = 0; j < strategy.size(); j++)
 		{
 			// Mutate (change sign) with probability 'probab'
 			int sample = rand() % 100;
 			if (sample < probabPercent)
-				strategy[j] = -strategy[j];
+				indexesToBeMutated.push_back(j);
 		}
+		this->currentIndividuals[i].mutateStrategyElementByIndexVector(indexesToBeMutated);
 	}
 }
 
@@ -150,4 +147,9 @@ std::vector<float> GeneticAlgorithm::getIndividualStrategyByIndex(int idx)
 {
 	assert(idx >= 0);
 	return this->currentIndividuals[idx].getPlayer().getStrategy();
+}
+
+Individual GeneticAlgorithm::getIndividualByIndex(int idx)
+{
+	return this->currentIndividuals.at(idx);
 }

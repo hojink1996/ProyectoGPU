@@ -9,6 +9,8 @@
 #include "../ProyectoGPU/hand.cpp"
 #include "../ProyectoGPU/player.h"
 #include "../ProyectoGPU/player.cpp"
+#include "../ProyectoGPU/individual.h"
+#include "../ProyectoGPU/individual.cpp"
 #include "../ProyectoGPU/straight-identifier.h"
 #include "../ProyectoGPU/straight-identifier.cpp"
 #include "../ProyectoGPU/texas-holdem.h"
@@ -679,16 +681,21 @@ TEST_CLASS(TestAgent)
 public:
 	TEST_METHOD(TestDecision)
 	{
-		LinearAgent agent = LinearAgent(20);
+		int stateSize = 2;
+		LinearAgent agent = LinearAgent(stateSize);
 
 		// State of all 0s should return a decision of Call
-		std::vector<float> state = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-		float maxBet = 10.0f;
-		float minBet = 1.0f;
-		Decision decision = agent.makeDecision(state, maxBet, minBet);
+		std::vector<float> state;
+		for (int i = 0; i < stateSize; i++)
+		{
+			state.push_back(0.0f);
+		}
+		float maxRaise = 10.0f;
+		float minRaise = 1.0f;
+		Decision decision = agent.makeDecision(state, minRaise, maxRaise);
 
-		Assert::AreEqual(static_cast<int>(decision.play), static_cast<int>(Play::Call));
-		Assert::AreEqual(static_cast<int>(decision.betAmount), static_cast<int>(minBet));
+		Assert::AreEqual(static_cast<int>(decision.play), static_cast<int>(Play::Raise));
+		Assert::AreEqual(static_cast<int>(decision.betAmount), static_cast<int>(minRaise));
 	}
 
 };
@@ -702,40 +709,37 @@ public:
 	{
 		int iniNumIndividuals = 4;
 		int numOpponents = 2;
-		GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents);
+		int numGamesPerPair = 2;
+		GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair);
 		ga.evaluate();
-
-		int totalWin = 0;
 
 		// Assert all individuals competed 'numOpponents' times
 		for (int i=0; i<ga.getNumIndividuals(); i++)
 		{
-			Assert::AreEqual(ga.currentIndividuals[i].getNumPlayedGames(), numOpponents);
-			totalWin += ga.currentIndividuals[i].getNumWins();
+			Assert::AreEqual(ga.getIndividualByIndex(i).getNumPlayedCompetitions(), numOpponents);
 		}
 
-		// Assert total number of wins is equal to total number of competitions
-		Assert::AreEqual(totalWin, iniNumIndividuals * numOpponents / 2);
 	}
 
 	TEST_METHOD(TestCrossOver)
 	{
 		int iniNumIndividuals = 3;
 		int numOpponents = 2;
-		GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents);
-		float* strategy0 = ga.getIndividualStrategyByIndex(0);
-		float* strategy1 = ga.getIndividualStrategyByIndex(1);
-		float* strategy2 = ga.getIndividualStrategyByIndex(2);
+		int numGamesPerPair = 2;
+		GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair);
+		std::vector<float> strategy0 = ga.getIndividualStrategyByIndex(0);
+		std::vector<float> strategy1 = ga.getIndividualStrategyByIndex(1);
+		std::vector<float> strategy2 = ga.getIndividualStrategyByIndex(2);
 
-		int lastIdx = 19;
+		int lastIdx = 5;
 		float s0 = strategy0[lastIdx];
 		float s1 = strategy1[lastIdx];
 		float s2 = strategy2[lastIdx];
 
 		ga.crossOver();
-		float* crossedStrategy0 = ga.getIndividualStrategyByIndex(0);
-		float* crossedStrategy1 = ga.getIndividualStrategyByIndex(1);
-		float* crossedStrategy2 = ga.getIndividualStrategyByIndex(2);
+		std::vector<float> crossedStrategy0 = ga.getIndividualStrategyByIndex(0);
+		std::vector<float> crossedStrategy1 = ga.getIndividualStrategyByIndex(1);
+		std::vector<float> crossedStrategy2 = ga.getIndividualStrategyByIndex(2);
 
 		// We don't know in which index was the cross over, but at least the last element of the array 
 		// should be changed in (thetaSize-1)/thetaSize of the times.
@@ -750,10 +754,11 @@ public:
 	{
 		int iniNumIndividuals = 3;
 		int numOpponents = 2;
-		GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents);
-		float* strategy0 = ga.getIndividualStrategyByIndex(0);
-		float* strategy1 = ga.getIndividualStrategyByIndex(1);
-		float* strategy2 = ga.getIndividualStrategyByIndex(2);
+		int numGamesPerPair = 2;
+		GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair);
+		std::vector<float> strategy0 = ga.getIndividualStrategyByIndex(0);
+		std::vector<float> strategy1 = ga.getIndividualStrategyByIndex(1);
+		std::vector<float> strategy2 = ga.getIndividualStrategyByIndex(2);
 
 		float s0 = strategy0[0];
 		float s1 = strategy1[0];
@@ -761,9 +766,9 @@ public:
 
 		// Mutate all values
 		ga.mutate(1.0);
-		float* mutatedStrategy0 = ga.getIndividualStrategyByIndex(0);
-		float* mutatedStrategy1 = ga.getIndividualStrategyByIndex(1);
-		float* mutatedStrategy2 = ga.getIndividualStrategyByIndex(2);
+		std::vector<float> mutatedStrategy0 = ga.getIndividualStrategyByIndex(0);
+		std::vector<float> mutatedStrategy1 = ga.getIndividualStrategyByIndex(1);
+		std::vector<float> mutatedStrategy2 = ga.getIndividualStrategyByIndex(2);
 
 		Assert::AreNotEqual(s0, mutatedStrategy0[0]);
 		Assert::AreNotEqual(s1, mutatedStrategy1[0]);
@@ -775,9 +780,9 @@ public:
 
 		// Not mutate any value
 		ga.mutate(0.0);
-		float* mutatedAgainStrategy0 = ga.getIndividualStrategyByIndex(0);
-		float* mutatedAgainStrategy1 = ga.getIndividualStrategyByIndex(1);
-		float* mutatedAgainStrategy2 = ga.getIndividualStrategyByIndex(2);
+		std::vector<float> mutatedAgainStrategy0 = ga.getIndividualStrategyByIndex(0);
+		std::vector<float> mutatedAgainStrategy1 = ga.getIndividualStrategyByIndex(1);
+		std::vector<float> mutatedAgainStrategy2 = ga.getIndividualStrategyByIndex(2);
 
 		Assert::AreEqual(ms0, mutatedAgainStrategy0[0]);
 		Assert::AreEqual(ms1, mutatedAgainStrategy1[0]);
