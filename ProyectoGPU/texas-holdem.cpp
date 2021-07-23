@@ -691,7 +691,7 @@ void TexasHoldem::bettingRound()
 		if (this->playerCurrentlyPlaying.at(currentPosition))
 		{
 			std::vector<float> state = this->getStateOfPlayer(currentPosition);
-			Decision currentPlayerDecision = this->players.at(currentPosition).decide(state, this->smallBlind, soFarBetValue);
+			Decision currentPlayerDecision = this->players.at(currentPosition).decide(static_cast<int>(this->currentGameState), state, this->smallBlind, soFarBetValue);
 			if (currentPlayerDecision.play == Play::Raise)
 			{
 				currentBetValue += currentPlayerDecision.betAmount;

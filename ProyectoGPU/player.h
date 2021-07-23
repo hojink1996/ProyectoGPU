@@ -33,7 +33,7 @@ public:
 	@return:				A decision structure that contains the information of the decision made by the player.
 	*/
 	//Decision makeDecision(int minimumBet, int currentBetValue);
-	Decision decide(std::vector<float> state, int minBet, int currentBetValue);
+	Decision decide(int gameStateIdx, std::vector<float> state, int minBet, int currentBetValue);
 
 	/*
 	Function used to add the player earnings during a round. The function takes the amount of money earned and the amount of money

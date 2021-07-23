@@ -31,9 +31,9 @@ Decision Player::makeDecision(int minimumBet, int currentBetValue)
 
 */
 
-Decision Player::decide(std::vector<float> state, int minBet, int currentBetValue)
+Decision Player::decide(int gameStateIdx, std::vector<float> state, int minBet, int currentBetValue)
 {
-	Decision decision = this->decisionAgent.makeDecision(state, minBet, this->stack - currentBetValue);
+	Decision decision = this->decisionAgent.makeDecision(gameStateIdx, state, minBet, this->stack - currentBetValue);
 	return decision;
 }
 

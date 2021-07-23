@@ -40,7 +40,7 @@ void RandomAgent::mutateStrategyElementByIndexVector(std::vector<int> indexesToB
 {
 }
 
-Decision RandomAgent::makeDecision(std::vector<float> state, float minRaise, float maxRaise)
+Decision RandomAgent::makeDecision(int gameStateIdx, std::vector<float> state, float minRaise, float maxRaise)
 {
 	assert(state.size() > 0);
 	assert(minRaise >= 0);
@@ -64,7 +64,7 @@ void RandomAgent::assignStrategy(std::vector<float> strategy, int idx)
 LinearAgent::LinearAgent(int thetaSize)
 {
 	assert(thetaSize > 0);
-	for (int i = 0; i < thetaSize * 4; i++) // First 1/3 is to compute Fold, second 2/3 for Call, and rest for amount
+	for (int i = 0; i < thetaSize * 16; i++) // First 1/3 is to compute Fold, second 2/3 for Call, and rest for amount
 	{
 		// Fill with random values between -1 and 1
 		this->theta.push_back((float)rand() / RAND_MAX * 2 - 1);
@@ -72,21 +72,22 @@ LinearAgent::LinearAgent(int thetaSize)
 }
 
 
-float LinearAgent::computeAmount(std::vector<float> state)
+float LinearAgent::computeAmount(int gameStateIdx, std::vector<float> state)
 {
-	assert(state.size() * 4 == this->theta.size());
+	assert(state.size() * 16 == this->theta.size());
 
+	int offset = gameStateIdx * state.size() * 4;  // Offset to operate with the theta corresponding to the current game state
 	float result = 0.0f;
 	for (int i = state.size() * 3; i < state.size() * 4; i++)
 	{
-		result += this->theta[i] * state[i % state.size()];
+		result += this->theta[offset + i] * state[i % state.size()];
 	}
 	return result;
 }
 
-Decision LinearAgent::makeDecision(std::vector<float> state, float minRaise, float maxRaise)
+Decision LinearAgent::makeDecision(int gameStateIdx, std::vector<float> state, float minRaise, float maxRaise)
 {
-	assert(state.size() * 4 == this->theta.size());
+	assert(state.size() * 16 == this->theta.size());
 	assert(minRaise >= 0);
 
 	Play play;
@@ -98,14 +99,14 @@ Decision LinearAgent::makeDecision(std::vector<float> state, float minRaise, flo
 		Decision decision{ Play::Fold, 0.0f };
 		return decision;
 	}
-
 	// Compute linear combination
+	int offset = gameStateIdx * state.size();  // Offset to operate with the theta corresponding to the current game state
 	std::vector<float> result = { 0.0f, 0.0f, 0.0f };  // fold, call, raise
 	for (int i = 0; i < state.size(); i++)
 	{
-		result[0] += this->theta[i] * state[i];
-		result[1] += this->theta[state.size() + i] * state[i];
-		result[2] += this->theta[state.size() * 2 + i] * state[i];
+		result[0] += this->theta[offset + i] * state[i];
+		result[1] += this->theta[offset + state.size() + i] * state[i];
+		result[2] += this->theta[offset + state.size() * 2 + i] * state[i];
 	}
 
 	// Compute softmax
@@ -128,7 +129,7 @@ Decision LinearAgent::makeDecision(std::vector<float> state, float minRaise, flo
 		else 
 		{
 			play = Play::Raise;
-			raiseAmount = min(max(this->computeAmount(state), minRaise), maxRaise);;
+			raiseAmount = min(max(this->computeAmount(gameStateIdx, state), minRaise), maxRaise);;
 		}
 	}
 	else  // Fold or Call

@@ -692,7 +692,7 @@ public:
 		}
 		float maxRaise = 10.0f;
 		float minRaise = 1.0f;
-		Decision decision = agent.makeDecision(state, minRaise, maxRaise);
+		Decision decision = agent.makeDecision(0, state, minRaise, maxRaise);
 
 		Assert::AreEqual(static_cast<int>(decision.play), static_cast<int>(Play::Fold));
 		Assert::AreEqual(static_cast<int>(decision.betAmount), 0);
@@ -731,7 +731,7 @@ public:
 		std::vector<float> strategy1 = ga.getIndividualStrategyByIndex(1);
 		std::vector<float> strategy2 = ga.getIndividualStrategyByIndex(2);
 
-		int lastIdx = 5;
+		int lastIdx = 2 * 16 - 1;
 		float s0 = strategy0[lastIdx];
 		float s1 = strategy1[lastIdx];
 		float s2 = strategy2[lastIdx];

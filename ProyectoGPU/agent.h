@@ -15,7 +15,7 @@ private:
 protected:
 	
 public:
-	virtual Decision makeDecision(std::vector<float> state, float minRaise, float maxRaise) = 0;
+	virtual Decision makeDecision(int gameStateIdx, std::vector<float> state, float minRaise, float maxRaise) = 0;
 	// virtual Decision makeDecision(int minimumBet, int maximumBet) = 0;
 	virtual std::vector<float> getTheta() = 0;
 	virtual void assignStrategy(std::vector<float> strategy, int idx) = 0;
@@ -30,7 +30,7 @@ class RandomAgent : public Agent
 private:
 public:
 	RandomAgent();
-	Decision makeDecision(std::vector<float> state, float minRaise, float maxRaise);
+	Decision makeDecision(int gameStateIdx, std::vector<float> state, float minRaise, float maxRaise);
 	std::vector<float> getTheta();
 	void assignStrategy(std::vector<float> strategy, int idx);
 	void mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated);
@@ -43,13 +43,10 @@ class LinearAgent : public Agent
 {
 private:
 	std::vector<float> theta;
-
-	bool computeFold(std::vector<float> state);
-	bool computeCall(std::vector<float> state);
-	float computeAmount(std::vector<float> state);
+	float computeAmount(int gameStateIdx, std::vector<float> state);
 public:
 	LinearAgent(int thetaSize);
-	Decision makeDecision(std::vector<float> state, float minRaise, float maxRaise);
+	Decision makeDecision(int gameStateIdx, std::vector<float> state, float minRaise, float maxRaise);
 
 	void printTheta();
 	std::vector<float> getTheta();
