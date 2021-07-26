@@ -56,12 +56,6 @@ void GeneticAlgorithm::evaluate()
 			// Sample a random opponent
 			int randIdx = rand() % this->numIndividuals;
 
-			// Resample if it's the same player as i or if the sampled player already played numOpponents times
-			while (randIdx == i || (this->currentIndividuals[randIdx].getNumPlayedCompetitions() >= this->numOpponents))
-			{
-				randIdx = rand() % this->numIndividuals;
-			}
-
 			// Let individuals compete
 			this->compete(this->currentIndividuals[i], this->currentIndividuals[randIdx]);
 			
