@@ -16,7 +16,7 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 	this->numGamesPerPair = numGamesPerPair;
 	//this->currentIndividuals = {};
 
-	int startingStack = 20;	
+	int startingStack = 5;	
 	for (int i = 0; i < this->numIndividuals; i++) 
 	{
 		LinearAgent* agent = new LinearAgent(2);

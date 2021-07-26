@@ -10,7 +10,7 @@ Context::Context()
 
 void Context::run()
 {
-	int iniNumIndividuals = 3;
+	int iniNumIndividuals = 4;
 	int numOpponents = 2;
 	int numGamesPerPair = 2;
 	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair);

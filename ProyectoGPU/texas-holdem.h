@@ -165,6 +165,7 @@ private:
 	uint64_t computeCardValue(Value cardValue, int shiftedBitPositions);
 
 	bool allPlayersAllIn();
+	bool onlyOnePlayerLeft();
 public:
 	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier,
 		int smallBlindValue=1);
