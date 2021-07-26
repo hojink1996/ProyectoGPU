@@ -63,7 +63,7 @@ private:
 	int currentlyPlayingPlayers{ 0 };
 	int dealerPosition{ 0 };
 	std::vector<bool> playerCurrentlyPlaying{};
-	std::vector<Player> players;
+	std::vector<Player*> players;
 	std::array<Card, 5> sharedCards;
 
 	/*
@@ -165,12 +165,13 @@ private:
 	uint64_t computeCardValue(Value cardValue, int shiftedBitPositions);
 
 	bool allPlayersAllIn();
+	bool onlyOnePlayerLeft();
 public:
 	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier,
 		int smallBlindValue=1);
 	TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, float startingStack, int smallBlindValue=1);
 	HandValue evaluateHand(Hand& hand, uint64_t& handValue);
-	void addPlayer(Player& player);
+	void addPlayer(Player* player);
 	void setSharedCards(std::array<Card, 5>& sharedCards);
 	void playRound();
 	std::vector<float> getStateOfPlayer(int idx);

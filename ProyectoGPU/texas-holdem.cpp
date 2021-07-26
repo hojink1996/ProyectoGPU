@@ -3,6 +3,7 @@
 #include "player.h"
 #include <algorithm>
 #include <vector>
+#include <iostream>
 #include <cstdint>
 #include <cassert>
 
@@ -17,7 +18,8 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAge
 	this->playerCurrentlyPlaying = {};
 	for (int i = 0; i < numPlayers; ++i)
 	{
-		this->players.push_back(Player(startingStack, decisionAgent));
+		Player* player = new Player(startingStack, decisionAgent);
+		this->players.push_back(player);
 		this->playerCurrentlyPlaying.push_back(true);
 	}
 	this->smallBlind = smallBlindValue;
@@ -42,7 +44,7 @@ TexasHoldem::TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, flo
 	this->minBet = smallBlindValue;
 }
 
-void TexasHoldem::addPlayer(Player& player)
+void TexasHoldem::addPlayer(Player* player)
 {
 	this->numPlayers++;
 	this->players.push_back(player);
@@ -67,7 +69,7 @@ void TexasHoldem::dealCards()
 	{
 		for (auto player : this->players)
 		{
-			player.addCardToHand(this->getNextCard(), cardNumber);
+			(*player).addCardToHand(this->getNextCard(), cardNumber);
 		}
 	}
 }
@@ -75,6 +77,8 @@ void TexasHoldem::dealCards()
 void TexasHoldem::drawFlop()
 {
 	this->currentGameState = GameState::Flop;
+	if (this->onlyOnePlayerLeft())
+		return;
 	for (int cardNumber = 0; cardNumber < 3; ++cardNumber)
 		sharedCards[cardNumber] = this->getNextCard();
 }
@@ -82,12 +86,16 @@ void TexasHoldem::drawFlop()
 void TexasHoldem::drawTurn()
 {
 	this->currentGameState = GameState::Turn;
+	if (this->onlyOnePlayerLeft())
+		return;
 	sharedCards[3] = this->getNextCard();
 }
 
 void TexasHoldem::drawRiver()
 {
 	this->currentGameState = GameState::River;
+	if (this->onlyOnePlayerLeft())
+		return;
 	sharedCards[4] = this->getNextCard();
 }
 
@@ -100,8 +108,8 @@ void TexasHoldem::resetPlayers()
 {
 	for (int i=0; i<this->numPlayers; i++)
 	{
-		this->players[i].resetHand();
-		this->players[i].setPlayerStack(this->startingStack);
+		(*this->players[i]).resetHand();
+		(*this->players[i]).setPlayerStack(this->startingStack);
 	}
 }
 
@@ -505,40 +513,56 @@ void TexasHoldem::setSharedCards(std::array<Card, 5>& sharedCards)
 std::vector<int> TexasHoldem::determineWinner()
 {
 	assert(this->currentGameState == GameState::River);
-	HandValue winningValue = HandValue::HighCard;
-	uint64_t winningHandValue = 0;
+
 	std::vector<int> winningIndex{};
-	int currentIndex = 0;
-	for (auto player : this->players)
+
+	if (this->onlyOnePlayerLeft())
 	{
-		if (!this->playerCurrentlyPlaying.at(currentIndex))
-			continue;
-		uint64_t handValue = 0;
-		HandValue playerHandValue = this->evaluateHand(player.getHand(), handValue);
-		assert(playerHandValue != HandValue::Invalid);
-		if (static_cast<int>(playerHandValue) > static_cast<int>(winningValue))
+		// Get index of the surviving player
+		for (int i = 0; i < this->playerCurrentlyPlaying.size(); i++)
 		{
-			winningValue = playerHandValue;
-			winningHandValue = handValue;
-			winningIndex = { currentIndex };
+			if (this->playerCurrentlyPlaying[i])
+			{
+				winningIndex = { i };
+				break;
+			}
 		}
-		else if (static_cast<int>(playerHandValue) == static_cast<int>(winningValue))
+	}
+	else
+	{
+		uint64_t winningHandValue = 0;
+		int currentIndex = 0;
+		for (auto player : this->players)
 		{
-			if (handValue > winningHandValue)
+			HandValue winningValue = HandValue::HighCard;
+			if (!this->playerCurrentlyPlaying.at(currentIndex))
+				continue;
+			uint64_t handValue = 0;
+			HandValue playerHandValue = this->evaluateHand((*player).getHand(), handValue);
+			assert(playerHandValue != HandValue::Invalid);
+			if (static_cast<int>(playerHandValue) > static_cast<int>(winningValue))
 			{
 				winningValue = playerHandValue;
 				winningHandValue = handValue;
 				winningIndex = { currentIndex };
 			}
-			else if (handValue == winningHandValue)
-				winningIndex.push_back(currentIndex);
+			else if (static_cast<int>(playerHandValue) == static_cast<int>(winningValue))
+			{
+				if (handValue > winningHandValue)
+				{
+					winningValue = playerHandValue;
+					winningHandValue = handValue;
+					winningIndex = { currentIndex };
+				}
+				else if (handValue == winningHandValue)
+					winningIndex.push_back(currentIndex);
+			}
+			currentIndex++;
 		}
-		currentIndex++;
+		for (int index : winningIndex)
+			assert(index >= 0);
+		assert(winningIndex.size() > 0);
 	}
-	for(int index: winningIndex)
-		assert(index >= 0);
-	assert(winningIndex.size() > 0);
-
 	return winningIndex;
 }
 
@@ -550,9 +574,9 @@ void TexasHoldem::assignEarningsToWinner(std::vector<int> winningPlayers)
 	{
 		// Find playerIdx in winningPlayers
 		if(std::find(winningPlayers.begin(), winningPlayers.end(), playerIndex) != winningPlayers.end())
-			this->players.at(playerIndex).addPlayerEarnings(totalEarningsPerPlayer, this->startingStack);
+			(*this->players.at(playerIndex)).addPlayerEarnings(totalEarningsPerPlayer, this->startingStack);
 		else
-			this->players.at(playerIndex).addPlayerEarnings(0, this->startingStack);
+			(*this->players.at(playerIndex)).addPlayerEarnings(0, this->startingStack);
 	}
 }
 
@@ -633,14 +657,12 @@ void TexasHoldem::playRound()
 	this->dealCards();
 	this->bettingRound();
 	this->drawFlop();
-	if (!this->allPlayersAllIn())
-		this->bettingRound();
+	this->bettingRound();
 	this->drawTurn();
-	if (!this->allPlayersAllIn())
-		this->bettingRound();
+	this->bettingRound();
 	this->drawRiver();
-	if (!this->allPlayersAllIn())
-		this->bettingRound();
+	this->bettingRound();
+	
 	std::vector<int> winnerIndex = this->determineWinner();
 	this->assignEarningsToWinner(winnerIndex);
 	this->endRound();
@@ -657,7 +679,7 @@ bool TexasHoldem::allPlayersAllIn()
 	// Return true if all players have all in, false otherwise
 	for (int i = 0; i < this->players.size(); i++)
 	{
-		if (this->playerCurrentlyPlaying.at(i) && this->players[i].getStack() > 0.0f)
+		if (this->playerCurrentlyPlaying.at(i) && (*this->players[i]).getStack() > 0.0f)
 		{
 			return false;
 		}
@@ -666,23 +688,31 @@ bool TexasHoldem::allPlayersAllIn()
 	
 }
 
+bool TexasHoldem::onlyOnePlayerLeft()
+{
+	return std::count(this->playerCurrentlyPlaying.begin(), this->playerCurrentlyPlaying.end(), true) == 1;
+}
+
 void TexasHoldem::bettingRound()
 {
+	if (this->allPlayersAllIn())
+		return;
 	int betStartingPosition, lastBetPosition;
-	float currentBetValue = 0.0f;
-	float soFarBetValue = 0.0f;
 	std::vector<int> currentPlayerBets(this->numPlayers, 0);
 	if (this->currentGameState == GameState::PreFlop)
 	{
 		betStartingPosition = (this->dealerPosition + 3) % (this->numPlayers);
 		currentPlayerBets.at((this->dealerPosition + 1) % (this->numPlayers)) = this->smallBlind;
 		currentPlayerBets.at((this->dealerPosition + 2) % (this->numPlayers)) = this->bigBlind;
-		soFarBetValue = this->bigBlind;
 	}
 	else
-		betStartingPosition = (this->dealerPosition - 1) % (this->numPlayers);
+		betStartingPosition = (this->dealerPosition - 1 + this->numPlayers) % (this->numPlayers);
+	int soFarBetValue = this->bigBlind;
+		
 	lastBetPosition = (betStartingPosition - 1 + this->numPlayers) % (this->numPlayers);
 	int currentPosition = betStartingPosition;
+
+	bool firstToBet = true;
 
 	while (true)
 	{
@@ -691,17 +721,17 @@ void TexasHoldem::bettingRound()
 		if (this->playerCurrentlyPlaying.at(currentPosition))
 		{
 			std::vector<float> state = this->getStateOfPlayer(currentPosition);
-			Decision currentPlayerDecision = this->players.at(currentPosition).decide(static_cast<int>(this->currentGameState), state, this->smallBlind, soFarBetValue);
+			Decision currentPlayerDecision = (*this->players.at(currentPosition)).decide(static_cast<int>(this->currentGameState), state, this->smallBlind, soFarBetValue);
 			if (currentPlayerDecision.play == Play::Raise)
 			{
-				currentBetValue += currentPlayerDecision.betAmount;
 				soFarBetValue += currentPlayerDecision.betAmount;
-				currentPlayerBets.at(currentPosition) += currentBetValue;
-				lastBetPosition = (currentPosition - 1) % (this->numPlayers);
+				currentPlayerBets.at(currentPosition) = soFarBetValue;
+				lastBetPosition = (currentPosition - 1 + this->numPlayers) % (this->numPlayers);
 			}
 			else if (currentPlayerDecision.play == Play::Call)
 			{
-				currentPlayerBets.at(currentPosition) += currentBetValue;
+				//currentPlayerBets.at(currentPosition) += currentBetValue;
+				currentPlayerBets.at(currentPosition) = soFarBetValue;
 				if (lastBetPosition == currentPosition)
 					break;
 			}
@@ -726,7 +756,7 @@ void TexasHoldem::bettingRound()
 	{
 		assert(bet >= 0);
 		this->currentTotalBetAmount += bet;
-		this->players.at(betIndex).decreaseStackSize(soFarBetValue);
+		(*this->players.at(betIndex)).decreaseStackSize(bet);
 		++betIndex;
 	}
 }

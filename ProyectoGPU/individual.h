@@ -4,13 +4,14 @@ class Individual
 {
 private:
 	Player& player;
+	Player* playerPointer;
 	int numPlayedCompetitions;
 	float score;
 public:
-	Individual(Player& player);
+	Individual(Player* player);
 	void addPlayedCompetition();
 	int getNumPlayedCompetitions();
-	Player& getPlayer();
+	Player* getPlayer();
 	void updateScore();
 	float getScore();
 	void crossOver(std::vector<float> strategy, int idx);

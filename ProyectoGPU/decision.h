@@ -18,5 +18,5 @@ the play they are doing and the amount they are betting).
 struct Decision
 {
 	Play play;
-	float betAmount;
+	int betAmount;
 };

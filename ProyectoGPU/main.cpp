@@ -9,20 +9,20 @@
 #include "../ProyectoGPU/texas-holdem.h"
 #include "../ProyectoGPU/agent.h"
 #include "../ProyectoGPU/genetic-algorithm.h"
+#include "../ProyectoGPU/context.h"
 
 using namespace std;
 
 void main()
 {
-	LinearAgent* agent = new LinearAgent(2);
-	Player* player = new Player(10, *agent);
-	Individual individual = Individual(*player);
-
-	std::vector<Player> vector;
-	vector.push_back(individual.getPlayer());
-	vector.at(0).addPlayerEarnings(1, 2);
+	
+	Context context = Context();
+	context.run();
 
 	cout << "" << endl;
+	
+
+
 
 	/*
 	LinearAgent agent;
