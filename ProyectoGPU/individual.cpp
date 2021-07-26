@@ -1,8 +1,9 @@
 #include <numeric>
 #include "individual.h"
 
-Individual::Individual(Player& player) : player(player)
+Individual::Individual(Player* player) : player(*player)
 {
+	this->playerPointer = player;
 	this->numPlayedCompetitions = 0;
 	this->score = 0.0f;
 }
@@ -22,9 +23,9 @@ void Individual::crossOver(std::vector<float> strategy, int idx)
 	this->player.assignStrategy(strategy, idx);
 }
 
-Player& Individual::getPlayer()
+Player* Individual::getPlayer()
 {
-	return this->player;
+	return this->playerPointer;
 }
 
 void Individual::mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated)

@@ -5,6 +5,7 @@
 Player::Player(int startingStack, Agent& decisionAgent) : decisionAgent(decisionAgent)
 {
 	this->stack = startingStack;
+	this->playerEarnings = {};
 }
 
 void Player::addCardToHand(Card card, int position)

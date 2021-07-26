@@ -14,24 +14,28 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 	this->numIndividuals = iniNumIndividuals;
 	this->numOpponents = numOpponents;
 	this->numGamesPerPair = numGamesPerPair;
+	//this->currentIndividuals = {};
 
 	int startingStack = 2;	
 	for (int i = 0; i < this->numIndividuals; i++) 
 	{
 		LinearAgent* agent = new LinearAgent(2);
 		Player* player = new Player(startingStack, *agent);
-		this->currentIndividuals.push_back(Individual(*player));
+		Individual individual = Individual(player);
+		this->currentIndividuals.push_back(individual);
 	}
 }
 
 
-void GeneticAlgorithm::compete(Individual individual1, Individual individual2)
+void GeneticAlgorithm::compete(Individual& individual1, Individual& individual2)
 {
 	// Create a game of TexasHoldem
-	TexasHoldem game = TexasHoldem(Deck(), StraightIdentifier(), 2.0f);
-	game.addPlayer(individual1.getPlayer());
-	game.addPlayer(individual2.getPlayer());
-	game.playMultipleRounds(this->numGamesPerPair);
+	TexasHoldem* game = new TexasHoldem(Deck(), StraightIdentifier(), 2.0f);
+	(*game).addPlayer(individual1.getPlayer());
+	(*game).addPlayer(individual2.getPlayer());
+	(*game).playMultipleRounds(this->numGamesPerPair);
+
+
 }
 
 /*
@@ -107,8 +111,8 @@ void GeneticAlgorithm::crossOver()
 	
 	for (int i = 0; i < this->numIndividuals - 1; i += 2)  // if 'numIndividuals' is odd, the last individual is skipped
 	{
-		std::vector<float> strategy1 = this->currentIndividuals[i].getPlayer().getStrategy();
-		std::vector<float> strategy2 = this->currentIndividuals[i + 1].getPlayer().getStrategy();
+		std::vector<float> strategy1 = (*this->currentIndividuals[i].getPlayer()).getStrategy();
+		std::vector<float> strategy2 = (*this->currentIndividuals[i + 1].getPlayer()).getStrategy();
 
 		int crossOverIdx = rand() % (strategy1.size());
 		this->currentIndividuals[i].crossOver(strategy2, crossOverIdx);
@@ -123,7 +127,7 @@ void GeneticAlgorithm::mutate(float probab)
 	int probabPercent = (int)probab * 100;
 	for (int i = 0; i < this->numIndividuals; i++)  // if 'numIndividuals' is odd, the last individual is skipped
 	{
-		std::vector<float> strategy = this->currentIndividuals[i].getPlayer().getStrategy();
+		std::vector<float> strategy = (*this->currentIndividuals[i].getPlayer()).getStrategy();
 
 		std::vector<int> indexesToBeMutated = {};
 		// Iterate over elements of the strategy array
@@ -146,7 +150,7 @@ int GeneticAlgorithm::getNumIndividuals()
 std::vector<float> GeneticAlgorithm::getIndividualStrategyByIndex(int idx)
 {
 	assert(idx >= 0);
-	return this->currentIndividuals[idx].getPlayer().getStrategy();
+	return (*this->currentIndividuals[idx].getPlayer()).getStrategy();
 }
 
 Individual GeneticAlgorithm::getIndividualByIndex(int idx)

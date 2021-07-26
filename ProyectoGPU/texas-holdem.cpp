@@ -17,7 +17,8 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAge
 	this->playerCurrentlyPlaying = {};
 	for (int i = 0; i < numPlayers; ++i)
 	{
-		this->players.push_back(Player(startingStack, decisionAgent));
+		Player* player = new Player(startingStack, decisionAgent);
+		this->players.push_back(player);
 		this->playerCurrentlyPlaying.push_back(true);
 	}
 	this->smallBlind = smallBlindValue;
@@ -42,7 +43,7 @@ TexasHoldem::TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, flo
 	this->minBet = smallBlindValue;
 }
 
-void TexasHoldem::addPlayer(Player& player)
+void TexasHoldem::addPlayer(Player* player)
 {
 	this->numPlayers++;
 	this->players.push_back(player);
@@ -67,7 +68,7 @@ void TexasHoldem::dealCards()
 	{
 		for (auto player : this->players)
 		{
-			player.addCardToHand(this->getNextCard(), cardNumber);
+			(*player).addCardToHand(this->getNextCard(), cardNumber);
 		}
 	}
 }
@@ -100,8 +101,8 @@ void TexasHoldem::resetPlayers()
 {
 	for (int i=0; i<this->numPlayers; i++)
 	{
-		this->players[i].resetHand();
-		this->players[i].setPlayerStack(this->startingStack);
+		(*this->players[i]).resetHand();
+		(*this->players[i]).setPlayerStack(this->startingStack);
 	}
 }
 
@@ -514,7 +515,7 @@ std::vector<int> TexasHoldem::determineWinner()
 		if (!this->playerCurrentlyPlaying.at(currentIndex))
 			continue;
 		uint64_t handValue = 0;
-		HandValue playerHandValue = this->evaluateHand(player.getHand(), handValue);
+		HandValue playerHandValue = this->evaluateHand((*player).getHand(), handValue);
 		assert(playerHandValue != HandValue::Invalid);
 		if (static_cast<int>(playerHandValue) > static_cast<int>(winningValue))
 		{
@@ -550,9 +551,9 @@ void TexasHoldem::assignEarningsToWinner(std::vector<int> winningPlayers)
 	{
 		// Find playerIdx in winningPlayers
 		if(std::find(winningPlayers.begin(), winningPlayers.end(), playerIndex) != winningPlayers.end())
-			this->players.at(playerIndex).addPlayerEarnings(totalEarningsPerPlayer, this->startingStack);
+			(*this->players.at(playerIndex)).addPlayerEarnings(totalEarningsPerPlayer, this->startingStack);
 		else
-			this->players.at(playerIndex).addPlayerEarnings(0, this->startingStack);
+			(*this->players.at(playerIndex)).addPlayerEarnings(0, this->startingStack);
 	}
 }
 
@@ -657,7 +658,7 @@ bool TexasHoldem::allPlayersAllIn()
 	// Return true if all players have all in, false otherwise
 	for (int i = 0; i < this->players.size(); i++)
 	{
-		if (this->playerCurrentlyPlaying.at(i) && this->players[i].getStack() > 0.0f)
+		if (this->playerCurrentlyPlaying.at(i) && (*this->players[i]).getStack() > 0.0f)
 		{
 			return false;
 		}
@@ -691,7 +692,7 @@ void TexasHoldem::bettingRound()
 		if (this->playerCurrentlyPlaying.at(currentPosition))
 		{
 			std::vector<float> state = this->getStateOfPlayer(currentPosition);
-			Decision currentPlayerDecision = this->players.at(currentPosition).decide(static_cast<int>(this->currentGameState), state, this->smallBlind, soFarBetValue);
+			Decision currentPlayerDecision = (*this->players.at(currentPosition)).decide(static_cast<int>(this->currentGameState), state, this->smallBlind, soFarBetValue);
 			if (currentPlayerDecision.play == Play::Raise)
 			{
 				currentBetValue += currentPlayerDecision.betAmount;
@@ -726,7 +727,7 @@ void TexasHoldem::bettingRound()
 	{
 		assert(bet >= 0);
 		this->currentTotalBetAmount += bet;
-		this->players.at(betIndex).decreaseStackSize(soFarBetValue);
+		(*this->players.at(betIndex)).decreaseStackSize(soFarBetValue);
 		++betIndex;
 	}
 }

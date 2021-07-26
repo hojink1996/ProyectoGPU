@@ -15,21 +15,27 @@ using namespace std;
 
 void main()
 {
+	/*
 	Context context = Context();
 	context.run();
 
 	cout << "" << endl;
+	*/
 
-	/*
+
+
+	
 	LinearAgent* agent = new LinearAgent(2);
 	Player* player = new Player(10, *agent);
-	Individual individual = Individual(*player);
+	Individual individual = Individual(player);
 
-	std::vector<Player> vector;
+	(*individual.getPlayer()).addPlayerEarnings(1, 2);
+
+	std::vector<Player*> vector = {};
 	vector.push_back(individual.getPlayer());
-	vector.at(0).addPlayerEarnings(1, 2);
+	(*vector.at(0)).addPlayerEarnings(1, 2);
 
-	*/
+	int a = 2;
 
 	/*
 	LinearAgent agent;

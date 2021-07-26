@@ -16,7 +16,7 @@ private:
 	float lastBet{ 0.0f };
 	Agent& decisionAgent;
 
-	std::vector<int> playerEarnings{};
+	std::vector<int> playerEarnings;
 public:
 	Player(int startingStack, Agent& decisionAgent);
 	void addCardToHand(Card card, int position);
