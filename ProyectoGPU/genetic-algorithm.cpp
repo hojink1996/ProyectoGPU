@@ -16,7 +16,7 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 	this->numGamesPerPair = numGamesPerPair;
 	//this->currentIndividuals = {};
 
-	int startingStack = 2;	
+	int startingStack = 20;	
 	for (int i = 0; i < this->numIndividuals; i++) 
 	{
 		LinearAgent* agent = new LinearAgent(2);
@@ -30,12 +30,10 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 void GeneticAlgorithm::compete(Individual& individual1, Individual& individual2)
 {
 	// Create a game of TexasHoldem
-	TexasHoldem* game = new TexasHoldem(Deck(), StraightIdentifier(), 2.0f);
-	(*game).addPlayer(individual1.getPlayer());
-	(*game).addPlayer(individual2.getPlayer());
-	(*game).playMultipleRounds(this->numGamesPerPair);
-
-
+	TexasHoldem game = TexasHoldem(Deck(), StraightIdentifier(), 2.0f);
+	game.addPlayer(individual1.getPlayer());
+	game.addPlayer(individual2.getPlayer());
+	game.playMultipleRounds(this->numGamesPerPair);
 }
 
 /*
@@ -53,8 +51,12 @@ void GeneticAlgorithm::evaluate()
 
 		for (int j = this->currentIndividuals[i].getNumPlayedCompetitions(); j < this->numOpponents; j++) {
 
-			// Sample a random opponent
+			// Sample a random opponent (of course different than i)
 			int randIdx = rand() % this->numIndividuals;
+			while (randIdx == i)
+			{
+				randIdx = rand() % this->numIndividuals;
+			}
 
 			// Let individuals compete
 			this->compete(this->currentIndividuals[i], this->currentIndividuals[randIdx]);
