@@ -10,6 +10,7 @@ private:
 	std::vector<Individual> newIndividuals;
 	std::vector<Individual> currentIndividuals;
 	void compete(Individual& player1, Individual& player2);
+	void resetIndividuals();
 
 public:
 	GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair=10);

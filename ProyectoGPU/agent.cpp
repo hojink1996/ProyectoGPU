@@ -137,7 +137,6 @@ Decision LinearAgent::makeDecision(int gameStateIdx, std::vector<float> state, f
 		play = static_cast<Play>(maxIdx);
 		raiseAmount = 0.0f;
 	}
-
 	Decision decision{ play, raiseAmount };
 
 	return decision;

@@ -71,4 +71,5 @@ public:
 	void mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated);
 
 	int getStack();
+	void resetEarnings();
 };

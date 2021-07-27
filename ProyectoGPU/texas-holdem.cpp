@@ -702,8 +702,31 @@ void TexasHoldem::bettingRound()
 	if (this->currentGameState == GameState::PreFlop)
 	{
 		betStartingPosition = (this->dealerPosition + 3) % (this->numPlayers);
-		currentPlayerBets.at((this->dealerPosition + 1) % (this->numPlayers)) = this->smallBlind;
-		currentPlayerBets.at((this->dealerPosition + 2) % (this->numPlayers)) = this->bigBlind;
+		int smallBlindPosition = (this->dealerPosition + 1) % (this->numPlayers);
+		int bigBlindPosition = (this->dealerPosition + 2) % (this->numPlayers);
+
+		if ((*this->players.at(smallBlindPosition)).getStack() < this->bigBlind)
+		{
+			this->playerCurrentlyPlaying.at(smallBlindPosition) = false;
+			this->currentlyPlayingPlayers--;
+		}
+		else
+		{
+			//currentPlayerBets.at((this->dealerPosition + 1) % (this->numPlayers)) = this->smallBlind;
+			(*this->players.at(smallBlindPosition)).decreaseStackSize(this->smallBlind);
+		}
+
+		if ((*this->players.at(bigBlindPosition)).getStack() < this->bigBlind)
+		{
+			this->playerCurrentlyPlaying.at(bigBlindPosition) = false;
+			this->currentlyPlayingPlayers--;
+		}			
+		else
+		{
+			//currentPlayerBets.at((this->dealerPosition + 2) % (this->numPlayers)) = this->bigBlind;
+			(*this->players.at(bigBlindPosition)).decreaseStackSize(this->bigBlind);
+		}
+			
 	}
 	else
 		betStartingPosition = (this->dealerPosition - 1 + this->numPlayers) % (this->numPlayers);
@@ -722,14 +745,21 @@ void TexasHoldem::bettingRound()
 		{
 			std::vector<float> state = this->getStateOfPlayer(currentPosition);
 			Decision currentPlayerDecision = (*this->players.at(currentPosition)).decide(static_cast<int>(this->currentGameState), state, this->smallBlind, soFarBetValue);
+			
+			//std::cout << "Idx: " << currentPosition << " " <<  static_cast<int>(currentPlayerDecision.play) << " " << currentPlayerDecision.betAmount << std::endl;
+
 			if (currentPlayerDecision.play == Play::Raise)
 			{
+				assert(currentPlayerDecision.betAmount + soFarBetValue <= (*this->players.at(currentPosition)).getStack());
+
 				soFarBetValue += currentPlayerDecision.betAmount;
 				currentPlayerBets.at(currentPosition) = soFarBetValue;
 				lastBetPosition = (currentPosition - 1 + this->numPlayers) % (this->numPlayers);
 			}
 			else if (currentPlayerDecision.play == Play::Call)
 			{
+				assert(currentPlayerDecision.betAmount + soFarBetValue <= (*this->players.at(currentPosition)).getStack());
+
 				//currentPlayerBets.at(currentPosition) += currentBetValue;
 				currentPlayerBets.at(currentPosition) = soFarBetValue;
 				if (lastBetPosition == currentPosition)
@@ -756,6 +786,7 @@ void TexasHoldem::bettingRound()
 	{
 		assert(bet >= 0);
 		this->currentTotalBetAmount += bet;
+		assert(bet <= (*this->players.at(betIndex)).getStack());
 		(*this->players.at(betIndex)).decreaseStackSize(bet);
 		++betIndex;
 	}

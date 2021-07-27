@@ -36,6 +36,14 @@ void GeneticAlgorithm::compete(Individual& individual1, Individual& individual2)
 	game.playMultipleRounds(this->numGamesPerPair);
 }
 
+void GeneticAlgorithm::resetIndividuals()
+{
+	for (int i = 0; i < this->numIndividuals; i++)
+	{
+		this->currentIndividuals[i].reset();
+	}
+}
+
 /*
 Evaluates the score of each individual.
 Each individual competes against 'numOpponents' random sampled individuals,
@@ -46,10 +54,7 @@ void GeneticAlgorithm::evaluate()
 	// Make players to play against numOpponent players
 	for (int i = 0; i < this->numIndividuals; i++)
 	{
-		if (this->currentIndividuals[i].getNumPlayedCompetitions() >= this->numOpponents)
-			continue;
-
-		for (int j = this->currentIndividuals[i].getNumPlayedCompetitions(); j < this->numOpponents; j++) {
+		for (int j = 0; j < this->numOpponents; j++) {
 
 			// Sample a random opponent (of course different than i)
 			int randIdx = rand() % this->numIndividuals;
@@ -78,13 +83,18 @@ void GeneticAlgorithm::selectBest(float ratio)
 	std::mt19937 generator(device()); // Seed the random number engine
 	
 	// Create discrete distribution given by the score of each individual
-	std::vector<int> scores;
+	std::vector<float> scores;
+	float rawScore, convertedScore;
 	for (int i = 0; i < this->currentIndividuals.size(); i++)
 	{
-		scores.push_back(this->currentIndividuals[i].getScore());
+		// Convert score with Softplus so that all scores are positive
+		rawScore = this->currentIndividuals[i].getScore();
+		convertedScore = std::log(1.0f + std::exp(rawScore));
+		scores.push_back(convertedScore);
 	}
 	std::discrete_distribution<> distrib(scores.begin(), scores.end()); // Create the distribution
 	
+
 	// Sample from the distribution
 	std::vector<Individual> newIndividuals;
 	for (int i = 0; i < (int)(ratio * this->numIndividuals); i++)
@@ -167,6 +177,8 @@ void GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
 
 	std::cout << "Mutating..." << std::endl;
 	this->mutate(mutateProbab);
+
+	this->resetIndividuals();
 }
 
 

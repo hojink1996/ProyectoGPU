@@ -92,3 +92,8 @@ int Player::getStack()
 {
 	return this->stack;
 }
+
+void Player::resetEarnings()
+{
+	this->playerEarnings.clear();
+}

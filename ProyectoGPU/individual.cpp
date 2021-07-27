@@ -46,3 +46,10 @@ void Individual::updateScore()
 	if (scores.size() != 0)
 		this->score += std::accumulate(scores.begin(), scores.end(), 0.0) / scores.size();	
 }
+
+void Individual::reset()
+{
+	this->score = 0.0f;
+	this->numPlayedCompetitions = 0;
+	this->player.resetEarnings();
+}
