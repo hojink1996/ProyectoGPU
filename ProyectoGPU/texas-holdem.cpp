@@ -714,6 +714,7 @@ void TexasHoldem::bettingRound()
 		{
 			//currentPlayerBets.at((this->dealerPosition + 1) % (this->numPlayers)) = this->smallBlind;
 			(*this->players.at(smallBlindPosition)).decreaseStackSize(this->smallBlind);
+			this->currentTotalBetAmount += this->smallBlind;
 		}
 
 		if ((*this->players.at(bigBlindPosition)).getStack() < this->bigBlind)
@@ -725,6 +726,7 @@ void TexasHoldem::bettingRound()
 		{
 			//currentPlayerBets.at((this->dealerPosition + 2) % (this->numPlayers)) = this->bigBlind;
 			(*this->players.at(bigBlindPosition)).decreaseStackSize(this->bigBlind);
+			this->currentTotalBetAmount += this->bigBlind;
 		}
 			
 	}

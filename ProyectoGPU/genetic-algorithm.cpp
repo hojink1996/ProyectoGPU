@@ -5,6 +5,7 @@
 #include "agent.h"
 #include "texas-holdem.h"
 #include "individual.h"
+#include "operations.cuh"
 
 GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair)
 {
@@ -27,11 +28,11 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 }
 
 
-void GeneticAlgorithm::compete(Individual& individual1, Individual& individual2)
+void GeneticAlgorithm::compete(Individual& individual, Individual& individual2)
 {
 	// Create a game of TexasHoldem
 	TexasHoldem game = TexasHoldem(Deck(), StraightIdentifier(), 2.0f);
-	game.addPlayer(individual1.getPlayer());
+	game.addPlayer(individual.getPlayer());
 	game.addPlayer(individual2.getPlayer());
 	game.playMultipleRounds(this->numGamesPerPair);
 }
@@ -70,7 +71,7 @@ void GeneticAlgorithm::evaluate()
 			this->currentIndividuals[i].updateScore();
 			this->currentIndividuals[randIdx].updateScore();
 			
-			// Add 1 to number of played games
+			// Add  to number of played games
 			this->currentIndividuals[i].addPlayedCompetition();
 			this->currentIndividuals[randIdx].addPlayedCompetition();
 		}
@@ -84,15 +85,19 @@ void GeneticAlgorithm::selectBest(float ratio)
 	
 	// Create discrete distribution given by the score of each individual
 	std::vector<float> scores;
-	float rawScore, convertedScore;
 	for (int i = 0; i < this->currentIndividuals.size(); i++)
 	{
 		// Convert score with Softplus so that all scores are positive
-		rawScore = this->currentIndividuals[i].getScore();
-		convertedScore = std::log(1.0f + std::exp(rawScore));
-		scores.push_back(convertedScore);
+		float rawScore = this->currentIndividuals[i].getScore();
+		//float convertedScore = std::log(1.0f + std::exp(rawScore));
+		scores.push_back(rawScore);
 	}
-	std::discrete_distribution<> distrib(scores.begin(), scores.end()); // Create the distribution
+
+	std::vector<float> output(this->numIndividuals, 1);
+	CudaFunctions::softplus(&scores[0], this->currentIndividuals.size(), &output[0]);
+
+
+	std::discrete_distribution<> distrib(output.begin(), output.end()); // Create the distribution
 	
 
 	// Sample from the distribution
@@ -114,15 +119,14 @@ void GeneticAlgorithm::selectBest(float ratio)
 
 void GeneticAlgorithm::crossOver()
 {
-	
 	for (int i = 0; i < this->numIndividuals - 1; i += 2)  // if 'numIndividuals' is odd, the last individual is skipped
 	{
-		std::vector<float> strategy1 = (*this->currentIndividuals[i].getPlayer()).getStrategy();
+		std::vector<float> strategy = (*this->currentIndividuals[i].getPlayer()).getStrategy();
 		std::vector<float> strategy2 = (*this->currentIndividuals[i + 1].getPlayer()).getStrategy();
 
-		int crossOverIdx = rand() % (strategy1.size());
+		int crossOverIdx = rand() % (strategy.size());
 		this->currentIndividuals[i].crossOver(strategy2, crossOverIdx);
-		this->currentIndividuals[i + 1].crossOver(strategy1, crossOverIdx);
+		this->currentIndividuals[i + 1].crossOver(strategy, crossOverIdx);
 	}
 }
 
@@ -130,7 +134,7 @@ void GeneticAlgorithm::mutate(float probab)
 {
 	assert(probab <= 1.0f && probab >= 0.0f);
 
-	int probabPercent = (int)probab * 100;
+	int probabPercent = (int)probab * 00;
 	for (int i = 0; i < this->numIndividuals; i++)  // if 'numIndividuals' is odd, the last individual is skipped
 	{
 		std::vector<float> strategy = (*this->currentIndividuals[i].getPlayer()).getStrategy();

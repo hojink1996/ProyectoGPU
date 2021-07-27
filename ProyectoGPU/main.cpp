@@ -10,64 +10,26 @@
 #include "../ProyectoGPU/agent.h"
 #include "../ProyectoGPU/genetic-algorithm.h"
 #include "../ProyectoGPU/context.h"
+#include "operations.cuh"
 
 using namespace std;
 
 void main()
 {
-	
-	Context context = Context();
-	context.run();
+	int iniNumIndividuals = 100;
+	int numOpponents = 5;
+	int numGamesPerPair = 5;
+	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair);
 
-	cout << "" << endl;
-	
+	float selectBestRatio = 1.0;
+	float mutateProbab = 0.1;
 
-
-
-	/*
-	LinearAgent agent;
-	agent.initialize_theta();
-	agent.print_theta();
-
-	float state[10] = { 0.0f, 1.0f, 10.0f, -2.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	float maxBet = 10.0f;
-	float minBet = 1.0f;
-	Decision decision = agent.makeDecision(state, maxBet, minBet);
-
-	cout << "FOLD: " << (decision.play == Play::Fold) << endl;
-	cout << "CALL: " << (decision.play == Play::Call) << endl;
-	cout << "RAISE: " << (decision.play == Play::Raise) << endl;
-	cout << "Invalid: " << (decision.play == Play::Invalid) << endl;
-
-	cout << "Amount: " << decision.betAmount << endl;
-
-	
-	
-	LinearAgent agent = LinearAgent(20);
-
-	int iniNumIndividuals = 3;
-	int numOpponents = 2;
-	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents);
-	
-	
-	ga.evaluate();
-	
-	int totalWin = 0;
-
-	// Assert all individuals competed 'numOpponents' times
-	for (int i = 0; i < ga.getNumIndividuals(); i++)
+	int numEpochs = 10;
+	for (int i = 0; i < numEpochs; i++)
 	{
-		cout << ga.getIndividualByIndex(i).getNumPlayedCompetitions() << endl;
+		cout << "Epoch " << i << "/" << numEpochs << endl;
+		ga.trainOneEpoch(selectBestRatio, mutateProbab);
 	}
-
-	cout << "Total win: " << totalWin << endl;
-
-	ga.selectBest(1.0);
 	
-
-	ga.crossOver();
-	ga.mutate(0.5);
-	*/
-
 	return;
 }
