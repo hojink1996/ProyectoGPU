@@ -16,6 +16,7 @@ TexasHoldem::TexasHoldem(int numPlayers, float startingStack, Agent& decisionAge
 	this->numPlayers = numPlayers;
 	this->sharedCards = { invalidCard, invalidCard, invalidCard, invalidCard, invalidCard };
 	this->playerCurrentlyPlaying = {};
+	this->lastBet = 0;
 	for (int i = 0; i < numPlayers; ++i)
 	{
 		Player* player = new Player(startingStack, decisionAgent);
@@ -39,6 +40,7 @@ TexasHoldem::TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, flo
 	this->currentGameState = GameState::Invalid;
 	this->sharedCards = { invalidCard, invalidCard, invalidCard, invalidCard, invalidCard };
 	this->playerCurrentlyPlaying = {};	
+	this->lastBet = 0;
 	this->smallBlind = smallBlindValue;
 	this->bigBlind = 2 * smallBlindValue;
 	this->minBet = smallBlindValue;
@@ -122,6 +124,7 @@ void TexasHoldem::beginRound()
 		this->playerCurrentlyPlaying.at(index) = true;
 	}
 }
+
 void TexasHoldem::endRound()
 {
 	/*
@@ -753,6 +756,7 @@ void TexasHoldem::bettingRound()
 				assert(currentPlayerDecision.betAmount + soFarBetValue <= (*this->players.at(currentPosition)).getStack());
 
 				soFarBetValue += currentPlayerDecision.betAmount;
+				this->lastBet = currentPlayerDecision.betAmount;
 				currentPlayerBets.at(currentPosition) = soFarBetValue;
 				lastBetPosition = (currentPosition - 1 + this->numPlayers) % (this->numPlayers);
 			}
@@ -761,6 +765,7 @@ void TexasHoldem::bettingRound()
 				assert(currentPlayerDecision.betAmount + soFarBetValue <= (*this->players.at(currentPosition)).getStack());
 
 				//currentPlayerBets.at(currentPosition) += currentBetValue;
+				this->lastBet = 0;
 				currentPlayerBets.at(currentPosition) = soFarBetValue;
 				if (lastBetPosition == currentPosition)
 					break;
@@ -768,6 +773,7 @@ void TexasHoldem::bettingRound()
 			else
 			{
 				--this->currentlyPlayingPlayers;
+				this->lastBet = 0;
 				this->playerCurrentlyPlaying.at(currentPosition) = false;
 				if (lastBetPosition == currentPosition)
 					break;
@@ -781,6 +787,7 @@ void TexasHoldem::bettingRound()
 		++currentPosition;
 		currentPosition = (currentPosition % this->numPlayers);
 	}
+	this->lastBet = 0;
 	int betIndex = 0;
 	for (int bet : currentPlayerBets)
 	{
@@ -792,11 +799,72 @@ void TexasHoldem::bettingRound()
 	}
 }
 
-std::vector<float> TexasHoldem::getStateOfPlayer(int idx) {
-	std::vector<float> state;
-	state.push_back(static_cast<float>(this->currentGameState));
-	state.push_back((float)rand() / RAND_MAX * 2 - 1);
-	
+State TexasHoldem::getStateOfPlayer(int index) {
+	State state = { {} };
+	this->addLastBetDelta(state);
+	this->addMoneyLeftPlayer(state, index);
+	this->addMoneyLeftOponent(state, index);
+	this->addPlayerBetAmount(state, index);
+	this->addCurrentHandCards(state, index);
+	this->addCurrentHandSuits(state, index);
+
 	return state;
 }
 
+void TexasHoldem::addLastBetDelta(State& state)
+{
+	state.values[0] = this->lastBet;
+}
+
+void TexasHoldem::addMoneyLeftPlayer(State& state, int playerIndex)
+{
+	int moneyLeft = this->players.at(playerIndex)->getStack();
+	state.values[1] = moneyLeft;
+}
+
+void TexasHoldem::addMoneyLeftOponent(State& state, int playerIndex)
+{
+	int moneyLeft = this->players.at((playerIndex - 1) % this->numPlayers)->getStack();
+	state.values[2] = moneyLeft;
+}
+
+void TexasHoldem::addPlayerBetAmount(State& state, int playerIndex)
+{
+	state.values[3] = this->currentTotalBetAmount;
+}
+
+void TexasHoldem::addCurrentHandCards(State& state, int playerIndex)
+{
+	Hand hand = this->players.at(playerIndex)->getHand();
+	int numberOfCards[13] = {};
+	for (Card card : hand.getHand())
+	{
+		numberOfCards[static_cast<int>(card.second)] += 1;
+	}
+	for (Card card : this->sharedCards)
+	{
+		numberOfCards[static_cast<int>(card.second)] += 1;
+	}
+	for (int cardIndex = 0; cardIndex < 13; ++cardIndex)
+	{
+		state.values[4 + cardIndex] = numberOfCards[cardIndex];
+	}
+}
+
+void TexasHoldem::addCurrentHandSuits(State& state, int playerIndex)
+{
+	Hand hand = this->players.at(playerIndex)->getHand();
+	int numberOfSuits[4] = {};
+	for (Card card : hand.getHand())
+	{
+		numberOfSuits[static_cast<int>(card.first)] += 1;
+	}
+	for (Card card : this->sharedCards)
+	{
+		numberOfSuits[static_cast<int>(card.first)] += 1;
+	}
+	for (int cardIndex = 0; cardIndex < 4; ++cardIndex)
+	{
+		state.values[17 + cardIndex] = numberOfSuits[cardIndex];
+	}
+}
