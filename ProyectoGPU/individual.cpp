@@ -40,11 +40,11 @@ float Individual::getScore()
 
 void Individual::updateScore()
 {
-	std::vector<int> scores = this->player.getPlayerEarnings();
+	std::vector<int> earnings = this->player.getPlayerEarnings();
 	
 	// Compute mean of earnings and add to score
-	if (scores.size() != 0)
-		this->score += std::accumulate(scores.begin(), scores.end(), 0.0) / scores.size();	
+	if (earnings.size() != 0)
+		this->score += std::accumulate(earnings.begin(), earnings.end(), 0.0) / earnings.size();
 }
 
 void Individual::reset()
@@ -52,4 +52,9 @@ void Individual::reset()
 	this->score = 0.0f;
 	this->numPlayedCompetitions = 0;
 	this->player.resetEarnings();
+}
+
+Individual* Individual::clone()
+{
+	return new Individual(&this->player);
 }

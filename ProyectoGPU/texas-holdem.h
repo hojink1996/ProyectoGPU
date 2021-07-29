@@ -5,15 +5,7 @@
 #include "card.h"
 #include "agent.h"
 #include "straight-identifier.h"
-
-/*
-The state of a player is given by a set of parameters that we define. Currently, we consider 22 parameters
-for the state vector.
-*/
-struct State
-{
-	float values[21];
-};
+#include "state.h"
 
 /*
 The different types of combinations that a hand + shared card combination can return in
@@ -184,9 +176,9 @@ private:
 	void addCurrentHandCards(State& state, int playerIndex);
 	void addCurrentHandSuits(State& state, int playerIndex);
 public:
-	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier,
+	TexasHoldem(int numPlayers, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier, int startingStack=1000,
 		int smallBlindValue=1);
-	TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, float startingStack, int smallBlindValue=1);
+	TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, float startingStack=1000, int smallBlindValue=1);
 	HandValue evaluateHand(Hand& hand, uint64_t& handValue);
 	void addPlayer(Player* player);
 	void setSharedCards(std::array<Card, 5>& sharedCards);

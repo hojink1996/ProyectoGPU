@@ -2,9 +2,9 @@
 #include "player.h"
 #include <cassert>
 
-Player::Player(int startingStack, Agent& decisionAgent) : decisionAgent(decisionAgent)
+Player::Player(Agent& decisionAgent) : decisionAgent(decisionAgent)
 {
-	this->stack = startingStack;
+	this->stack = 0;
 	this->playerEarnings = {};
 }
 
@@ -32,7 +32,7 @@ Decision Player::makeDecision(int minimumBet, int currentBetValue)
 
 */
 
-Decision Player::decide(int gameStateIdx, std::vector<float> state, int minBet, int currentBetValue)
+Decision Player::decide(int gameStateIdx, State& state, int minBet, int currentBetValue)
 {
 	Decision decision = this->decisionAgent.makeDecision(gameStateIdx, state, minBet, this->stack - currentBetValue);
 	return decision;
@@ -96,4 +96,9 @@ int Player::getStack()
 void Player::resetEarnings()
 {
 	this->playerEarnings.clear();
+}
+
+void Player::assignStack(int stack)
+{
+	this->stack = stack;
 }

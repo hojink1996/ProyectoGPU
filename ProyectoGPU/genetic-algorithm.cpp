@@ -15,13 +15,11 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 	this->numIndividuals = iniNumIndividuals;
 	this->numOpponents = numOpponents;
 	this->numGamesPerPair = numGamesPerPair;
-	//this->currentIndividuals = {};
-
-	int startingStack = 5;	
+	
 	for (int i = 0; i < this->numIndividuals; i++) 
 	{
-		LinearAgent* agent = new LinearAgent(2);
-		Player* player = new Player(startingStack, *agent);
+		LinearAgent* agent = new LinearAgent(21);
+		Player* player = new Player(*agent);
 		Individual individual = Individual(player);
 		this->currentIndividuals.push_back(individual);
 	}
@@ -31,7 +29,7 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 void GeneticAlgorithm::compete(Individual& individual, Individual& individual2)
 {
 	// Create a game of TexasHoldem
-	TexasHoldem game = TexasHoldem(Deck(), StraightIdentifier(), 2.0f);
+	TexasHoldem game = TexasHoldem(Deck(), StraightIdentifier());
 	game.addPlayer(individual.getPlayer());
 	game.addPlayer(individual2.getPlayer());
 	game.playMultipleRounds(this->numGamesPerPair);
@@ -88,24 +86,31 @@ void GeneticAlgorithm::selectBest(float ratio)
 	for (int i = 0; i < this->currentIndividuals.size(); i++)
 	{
 		// Convert score with Softplus so that all scores are positive
-		float rawScore = this->currentIndividuals[i].getScore();
+		float rawScore = this->currentIndividuals[i].getScore() / (this->currentIndividuals[i].getNumPlayedCompetitions());
 		scores.push_back(rawScore);
 	}
 
-	std::vector<float> output(this->numIndividuals, 0);
-	CudaFunctions::softplus(&scores[0], this->currentIndividuals.size(), &output[0]);
+	std::vector<float> transformedScores(this->numIndividuals, 0);
+	CudaFunctions::softplus(&scores[0], this->currentIndividuals.size(), &transformedScores[0]);
 
-	std::discrete_distribution<> distrib(output.begin(), output.end()); // Create the distribution
-	
+	std::discrete_distribution<> distrib(transformedScores.begin(), transformedScores.end()); // Create the distribution
 
 	// Sample from the distribution
 	std::vector<Individual> newIndividuals;
-	for (int i = 0; i < (int)(ratio * this->numIndividuals); i++)
+	float meanScore = 0;
+	int nextGenerationSize = (int)(ratio * this->numIndividuals);
+	
+	std::vector<std::vector<float>> sampledStrategies;
+	for (int i = 0; i < nextGenerationSize; i++)
 	{
 		int randIdx = distrib(generator);
+		Individual* newIndividual = this->currentIndividuals[randIdx].clone();
+		Individual newInd = *newIndividual;
 		newIndividuals.push_back(this->currentIndividuals[randIdx]);
+		meanScore += scores[randIdx] / nextGenerationSize;
 	}
-	
+	std::cout << "Average score: " << meanScore << std::endl;
+
 	// Replace the current individuals
 	this->currentIndividuals.clear();
 	for (int i = 0; i < newIndividuals.size(); i++)

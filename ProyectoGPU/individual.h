@@ -18,4 +18,5 @@ public:
 	void mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask);
 
 	void reset();
+	Individual* clone();
 };

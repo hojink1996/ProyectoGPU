@@ -41,9 +41,9 @@ void RandomAgent::mutateStrategyElementByIndexVector(std::vector<float> noise, s
 {
 }
 
-Decision RandomAgent::makeDecision(int gameStateIdx, std::vector<float> state, float minRaise, float maxRaise)
+Decision RandomAgent::makeDecision(int gameStateIdx, State& state, float minRaise, float maxRaise)
 {
-	assert(state.size() > 0);
+	assert(sizeof(state) > 0);
 	assert(minRaise >= 0);
 
 	Play play = static_cast<Play>(std::rand() % 3);
@@ -73,22 +73,24 @@ LinearAgent::LinearAgent(int thetaSize)
 }
 
 
-float LinearAgent::computeAmount(int gameStateIdx, std::vector<float> state)
+float LinearAgent::computeAmount(int gameStateIdx, State& state)
 {
-	assert(state.size() * 16 == this->theta.size());
+	int stateSize = sizeof(state.values) / sizeof(state.values[0]);
+	assert(stateSize * 16 == this->theta.size());
 
-	int offset = gameStateIdx * state.size() * 4;  // Offset to operate with the theta corresponding to the current game state
+	int offset = gameStateIdx * stateSize * 4;  // Offset to operate with the theta corresponding to the current game state
 	float result = 0.0f;
-	for (int i = state.size() * 3; i < state.size() * 4; i++)
+	for (int i = stateSize * 3; i < stateSize * 4; i++)
 	{
-		result += this->theta[offset + i] * state[i % state.size()];
+		result += this->theta[offset + i] * state.values[i % stateSize];
 	}
 	return result;
 }
 
-Decision LinearAgent::makeDecision(int gameStateIdx, std::vector<float> state, float minRaise, float maxRaise)
+Decision LinearAgent::makeDecision(int gameStateIdx, State& state, float minRaise, float maxRaise)
 {
-	assert(state.size() * 16 == this->theta.size());
+	int stateSize = sizeof(state.values) / sizeof(state.values[0]);
+	assert(stateSize * 16 == this->theta.size());
 	assert(minRaise >= 0);
 
 	Play play;
@@ -101,12 +103,12 @@ Decision LinearAgent::makeDecision(int gameStateIdx, std::vector<float> state, f
 		return decision;
 	}
 	// Compute linear combination
-	int offset = gameStateIdx * state.size();  // Offset to operate with the theta corresponding to the current game state
+	int offset = gameStateIdx * stateSize;  // Offset to operate with the theta corresponding to the current game state
 	std::vector<float> result(4, 0);  // fold, call, raise
 
-	result[0] = CudaFunctions::dotProduct(&this->theta[offset], &state[0], state.size());
-	result[1] = CudaFunctions::dotProduct(&this->theta[offset + state.size()], &state[0], state.size());
-	result[2] = CudaFunctions::dotProduct(&this->theta[offset + state.size() * 2], &state[0], state.size());
+	result[0] = CudaFunctions::dotProduct(&this->theta[offset], &state.values[0], stateSize);
+	result[1] = CudaFunctions::dotProduct(&this->theta[offset + stateSize], &state.values[0], stateSize);
+	result[2] = CudaFunctions::dotProduct(&this->theta[offset + stateSize * 2], &state.values[0], stateSize);
 
 	
 	// Compute softmax

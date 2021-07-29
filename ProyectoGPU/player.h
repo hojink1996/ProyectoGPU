@@ -1,6 +1,7 @@
 #pragma once
 #include "hand.h"
 #include "agent.h"
+#include "state.h"
 
 /*
 The Player Class is used to represent a player playing the game.
@@ -18,7 +19,7 @@ private:
 
 	std::vector<int> playerEarnings;
 public:
-	Player(int startingStack, Agent& decisionAgent);
+	Player(Agent& decisionAgent);
 	void addCardToHand(Card card, int position);
 	void resetHand();
 	Hand getHand();
@@ -33,7 +34,7 @@ public:
 	@return:				A decision structure that contains the information of the decision made by the player.
 	*/
 	//Decision makeDecision(int minimumBet, int currentBetValue);
-	Decision decide(int gameStateIdx, std::vector<float> state, int minBet, int currentBetValue);
+	Decision decide(int gameStateIdx, State& state, int minBet, int currentBetValue);
 
 	/*
 	Function used to add the player earnings during a round. The function takes the amount of money earned and the amount of money
@@ -72,4 +73,6 @@ public:
 
 	int getStack();
 	void resetEarnings();
+
+	void assignStack(int stack);
 };

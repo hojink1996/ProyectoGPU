@@ -18,8 +18,8 @@ void main()
 {
 	
 	int iniNumIndividuals = 100;
-	int numOpponents = 5;
-	int numGamesPerPair = 5;
+	int numOpponents = 1;
+	int numGamesPerPair = 2;
 	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair);
 
 	float selectBestRatio = 1.0;

@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "decision.h"
+#include "state.h"
 
 /*
 The Agent Class is an Abstract Class used as a proxy for the decisions that the
@@ -15,7 +16,7 @@ private:
 protected:
 	
 public:
-	virtual Decision makeDecision(int gameStateIdx, std::vector<float> state, float minRaise, float maxRaise) = 0;
+	virtual Decision makeDecision(int gameStateIdx, State& state, float minRaise, float maxRaise) = 0;
 	// virtual Decision makeDecision(int minimumBet, int maximumBet) = 0;
 	virtual std::vector<float> getTheta() = 0;
 	virtual void assignStrategy(std::vector<float> strategy, int idx) = 0;
@@ -30,7 +31,7 @@ class RandomAgent : public Agent
 private:
 public:
 	RandomAgent();
-	Decision makeDecision(int gameStateIdx, std::vector<float> state, float minRaise, float maxRaise);
+	Decision makeDecision(int gameStateIdx, State& state, float minRaise, float maxRaise);
 	std::vector<float> getTheta();
 	void assignStrategy(std::vector<float> strategy, int idx);
 	void mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask);
@@ -43,10 +44,10 @@ class LinearAgent : public Agent
 {
 private:
 	std::vector<float> theta;
-	float computeAmount(int gameStateIdx, std::vector<float> state);
+	float computeAmount(int gameStateIdx, State& state);
 public:
 	LinearAgent(int thetaSize);
-	Decision makeDecision(int gameStateIdx, std::vector<float> state, float minRaise, float maxRaise);
+	Decision makeDecision(int gameStateIdx, State& state, float minRaise, float maxRaise);
 
 	void printTheta();
 	std::vector<float> getTheta();
