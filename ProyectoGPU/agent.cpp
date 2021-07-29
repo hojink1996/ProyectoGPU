@@ -41,13 +41,13 @@ void RandomAgent::mutateStrategyElementByIndexVector(std::vector<float> noise, s
 {
 }
 
-Decision RandomAgent::makeDecision(int gameStateIdx, State& state, float minRaise, float maxRaise)
+Decision RandomAgent::makeDecision(int gameStateIdx, State& state, int minRaise, int maxRaise)
 {
 	assert(sizeof(state) > 0);
 	assert(minRaise >= 0);
 
 	Play play = static_cast<Play>(std::rand() % 3);
-	float bet = max(float(rand()) / float((RAND_MAX)), minRaise);
+	float bet = max(rand() / RAND_MAX, minRaise);
 	Decision decision{ play, bet };
 
 	return decision;
@@ -93,7 +93,7 @@ float LinearAgent::computeAmount(int gameStateIdx, State& state)
 	return result;
 }
 
-Decision LinearAgent::makeDecision(int gameStateIdx, State& state, float minRaise, float maxRaise)
+Decision LinearAgent::makeDecision(int gameStateIdx, State& state, int minRaise, int maxRaise)
 {
 	int stateSize = sizeof(state.values) / sizeof(state.values[0]);
 	assert(stateSize * 16 == this->theta.size());
@@ -111,14 +111,9 @@ Decision LinearAgent::makeDecision(int gameStateIdx, State& state, float minRais
 	// Compute linear combination
 	int offset = gameStateIdx * stateSize;  // Offset to operate with the theta corresponding to the current game state
 	std::vector<float> result(4, 0);  // fold, call, raise
-
-	result[0] = CudaFunctions::dotProduct(&this->theta[offset], &state.values[0], stateSize);
-	result[1] = CudaFunctions::dotProduct(&this->theta[offset + stateSize], &state.values[0], stateSize);
-	result[2] = CudaFunctions::dotProduct(&this->theta[offset + stateSize * 2], &state.values[0], stateSize);
-
+	CudaFunctions::dotProductWindow(&this->theta[offset], &state.values[0], stateSize, &result[0], result.size());
 	
 	// Compute softmax
-
 	/*
 	float normalizingConstant = exp(result[0]) + exp(result[1]) + exp(result[2]);
 	for (int i = 0 ; i < 3; i++)
@@ -140,7 +135,7 @@ Decision LinearAgent::makeDecision(int gameStateIdx, State& state, float minRais
 		else 
 		{
 			play = Play::Raise;
-			raiseAmount = min(max(this->computeAmount(gameStateIdx, state), minRaise), maxRaise);;
+			raiseAmount = min(max((int)result[3], minRaise), maxRaise);;
 		}
 	}
 	else  // Fold or Call

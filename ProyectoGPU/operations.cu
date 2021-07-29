@@ -1,3 +1,5 @@
+#include <iostream>
+#include <vector>
 #include "operations.cuh"
 #define BLOCK_SIZE 512
 
@@ -51,67 +53,64 @@ __global__ void dotProductCuda(const float* firstInput, const float* secondInput
 
 __global__ void dotProductWindowCuda(const float* firstInput, const float* secondInput, const int N, float* output)
 {
-	
 	// Dynamically allocate the share memory
-	int THREADS_PER_BLOCK = __cudaGet_blockDim().x;
+	//int THREADS_PER_BLOCK = __cudaGet_blockDim().x;
 	__shared__ float sharedMemory[BLOCK_SIZE];
 	int multiplyX = blockDim.x * blockIdx.x + threadIdx.x;
 	sharedMemory[threadIdx.x] = firstInput[multiplyX] * secondInput[multiplyX % N];
+	//printf(" (%i) %f * %f  = %f \n", multiplyX, firstInput[multiplyX], secondInput[multiplyX % N], sharedMemory[threadIdx.x]);
 
-	int outIdx = (multiplyX - multiplyX % N) / N;
-	output[outIdx] = 4.0f;
+	int tIdx = threadIdx.x;
 
 	// All of the threads must be done with the multiplication
 	__syncthreads();
 
-	
-
-	/*
-	
 	// Add the values in the block
+	int offset = blockDim.x * blockIdx.x;
 	if (threadIdx.x == 0)
 	{
-		for (int i = 0; i < N * outputSize; ++i)
+		for (int i = 0; i < BLOCK_SIZE; ++i)
 		{
-			output[multiplyX] = 4; // += sharedMemory[i];
-			// printf("%s", sharedMemory[i]);
-		}
-	}
-	*/
-	
+			output[(offset + i) / N] += sharedMemory[i];
+		 }
+	}	
+	__syncthreads();
+
+	//printf("(%i) out: %f, %f, %f, %f\n", multiplyX, output[0], output[1], output[2], output[3]);
 }
 
 namespace CudaFunctions
 {
 	void dotProductWindow(float* firstInput, float* secondInput, int N, float* output, int outputSize)
 	{
+		int inputSize = N * outputSize;
 		// Allocate memory for the CUDA operations
 		float* dFirstInput;
 		float* dSecondInput;
 		float* dOutput;
-		cudaMalloc((void**)& dFirstInput, N * outputSize * sizeof(float));
+		cudaMalloc((void**)& dFirstInput, inputSize * sizeof(float));
 		cudaMalloc((void**)& dSecondInput, N * sizeof(float));
 		cudaMalloc((void**)& dOutput, outputSize * sizeof(float));
 
 		// Copy the values to GPU
-		cudaMemcpy(dFirstInput, firstInput, N * outputSize * sizeof(float), cudaMemcpyHostToDevice);
+		cudaMemcpy(dFirstInput, firstInput, inputSize * sizeof(float), cudaMemcpyHostToDevice);
 		cudaMemcpy(dSecondInput, secondInput, N * sizeof(float), cudaMemcpyHostToDevice);
-		//cudaMemcpy(dOutput, output, outputSize * sizeof(float), cudaMemcpyHostToDevice);
+		cudaMemcpy(dOutput, output, outputSize * sizeof(float), cudaMemcpyHostToDevice);
 
 		// Set the blocks to use
-		dim3 dimBlock(N * outputSize);
-		dim3 dimGrid(N * outputSize / BLOCK_SIZE + 1);
+		dim3 dimBlock(BLOCK_SIZE);
+		dim3 dimGrid((inputSize + BLOCK_SIZE - 1)/ BLOCK_SIZE);
 
 		// Run the kernel
 		dotProductWindowCuda<<<dimGrid, dimBlock>>> (dFirstInput, dSecondInput, N, dOutput);
 		cudaDeviceSynchronize();
 
 		// Copy the values to host
-		cudaMemcpy(&output, dOutput, outputSize * sizeof(float), cudaMemcpyDeviceToHost);
+		cudaMemcpy(output, dOutput, outputSize * sizeof(float), cudaMemcpyDeviceToHost);
 
 		cudaError_t error = cudaGetLastError();
 		if (error != cudaSuccess) {
-			fprintf(stderr, "ERROR: %s \n", cudaGetErrorString(error));
+			fprintf(stderr, "ERROR CUDA: %s \n", cudaGetErrorString(error));
 			return;
 		}	
 

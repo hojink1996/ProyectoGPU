@@ -6,6 +6,7 @@
 #include <device_launch_parameters.h>
 #include <device_functions.h>
 #include <math.h>
+
 namespace CudaFunctions {
 	float dotProduct(float* firstInput, float* secondInput, int N);
 	void dotProductWindow(float* firstInput, float* secondInput, int N, float* output, int outputSize);

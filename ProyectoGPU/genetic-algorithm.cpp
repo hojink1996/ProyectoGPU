@@ -105,8 +105,6 @@ void GeneticAlgorithm::selectBest(float ratio)
 	{
 		int randIdx = distrib(generator);
 		Individual* newIndividual = this->currentIndividuals[randIdx].clone();
-		Individual newInd = *newIndividual;
-
 		newIndividuals.push_back(*newIndividual);
 		meanScore += scores[randIdx] / nextGenerationSize;
 	}

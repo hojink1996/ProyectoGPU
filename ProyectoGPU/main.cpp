@@ -18,14 +18,14 @@ void main()
 {
 	
 	int iniNumIndividuals = 100;
-	int numOpponents = 1;
+	int numOpponents = 2;
 	int numGamesPerPair = 2;
 	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair);
 
 	float selectBestRatio = 1.0;
 	float mutateProbab = 0.1;
 
-	int numEpochs = 10;
+	int numEpochs = 50;
 	for (int i = 0; i < numEpochs; i++)
 	{
 		cout << "Epoch " << i << "/" << numEpochs << endl;
