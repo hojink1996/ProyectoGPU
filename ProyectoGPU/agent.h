@@ -43,10 +43,11 @@ LinearAgent: Agent that makes decision given a linear combination with its param
 class LinearAgent : public Agent
 {
 private:
-	std::vector<float> theta;
+	std::vector<float> theta = {};
 	float computeAmount(int gameStateIdx, State& state);
 public:
 	LinearAgent(int thetaSize);
+	LinearAgent(std::vector<float> theta);
 	Decision makeDecision(int gameStateIdx, State& state, float minRaise, float maxRaise);
 
 	void printTheta();

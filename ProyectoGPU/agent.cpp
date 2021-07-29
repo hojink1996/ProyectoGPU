@@ -72,6 +72,12 @@ LinearAgent::LinearAgent(int thetaSize)
 	}
 }
 
+LinearAgent::LinearAgent(std::vector<float> theta)
+{
+	assert(theta.size() > 0);
+	std::copy(theta.begin(), theta.end(), back_inserter(this->theta));
+}
+
 
 float LinearAgent::computeAmount(int gameStateIdx, State& state)
 {

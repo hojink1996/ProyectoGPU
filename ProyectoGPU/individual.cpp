@@ -56,5 +56,8 @@ void Individual::reset()
 
 Individual* Individual::clone()
 {
-	return new Individual(&this->player);
+	std::vector<float> theta = this->player.getAgent().getTheta();
+	LinearAgent* newAgent = new LinearAgent(theta);
+	Individual* ind = new Individual(new Player(*newAgent));
+	return ind;
 }
