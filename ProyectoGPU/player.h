@@ -68,7 +68,7 @@ public:
 	std::vector<float> getStrategy();
 	Agent& getAgent();
 	void assignStrategy(std::vector<float> strategy, int idx);
-	void mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated);
+	void mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask);
 
 	int getStack();
 	void resetEarnings();

@@ -3,6 +3,7 @@
 #include <cassert>
 #include "agent.h"
 #include "decision.h"
+#include "operations.cuh"
 
 
 using namespace std;
@@ -36,7 +37,7 @@ RandomAgent::RandomAgent()
 	
 }
 
-void RandomAgent::mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated)
+void RandomAgent::mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask)
 {
 }
 
@@ -101,20 +102,22 @@ Decision LinearAgent::makeDecision(int gameStateIdx, std::vector<float> state, f
 	}
 	// Compute linear combination
 	int offset = gameStateIdx * state.size();  // Offset to operate with the theta corresponding to the current game state
-	std::vector<float> result = { 0.0f, 0.0f, 0.0f };  // fold, call, raise
-	for (int i = 0; i < state.size(); i++)
-	{
-		result[0] += this->theta[offset + i] * state[i];
-		result[1] += this->theta[offset + state.size() + i] * state[i];
-		result[2] += this->theta[offset + state.size() * 2 + i] * state[i];
-	}
+	std::vector<float> result(4, 0);  // fold, call, raise
 
+	result[0] = CudaFunctions::dotProduct(&this->theta[offset], &state[0], state.size());
+	result[1] = CudaFunctions::dotProduct(&this->theta[offset + state.size()], &state[0], state.size());
+	result[2] = CudaFunctions::dotProduct(&this->theta[offset + state.size() * 2], &state[0], state.size());
+
+	
 	// Compute softmax
+
+	/*
 	float normalizingConstant = exp(result[0]) + exp(result[1]) + exp(result[2]);
 	for (int i = 0 ; i < 3; i++)
 	{
-		result[i] = result[i] / normalizingConstant;
+		result[i] = exp(result[i]) / normalizingConstant;
 	}
+	*/
 
 	// Get argmax
 	int maxIdx = std::distance(result.begin(), std::max_element(result.begin(), result.end()));
@@ -142,10 +145,7 @@ Decision LinearAgent::makeDecision(int gameStateIdx, std::vector<float> state, f
 	return decision;
 }
 
-void LinearAgent::mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated)
+void LinearAgent::mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask)
 {
-	for (int i : indexesToBeMutated)
-	{
-		this->theta[i] = (float)rand() / RAND_MAX * 2 - 1;
-	}
+	CudaFunctions::maskedAdd(&this->theta[0], &noise[0], &mask[0], this->theta.size(), &this->theta[0]);
 }

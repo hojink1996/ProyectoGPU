@@ -28,9 +28,9 @@ Player* Individual::getPlayer()
 	return this->playerPointer;
 }
 
-void Individual::mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated)
+void Individual::mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask)
 {
-	this->player.mutateStrategyElementByIndexVector(indexesToBeMutated);
+	this->player.mutateStrategyElementByIndexVector(noise, mask);
 }
 
 float Individual::getScore()

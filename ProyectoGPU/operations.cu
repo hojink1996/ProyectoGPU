@@ -13,7 +13,7 @@ __global__ void multiplyKernel(const float* firstInput, const float* secondInput
 	output[index] = firstInput[index] * secondInput[index];
 }
 
-__global__ void maskedAddKernel(const float* firstInput, const float* secondInput, const float* mask, float* output)
+__global__ void maskedAddKernel(const float* firstInput, const float* secondInput, const int* mask, float* output)
 {
 	int index = blockDim.x * blockIdx.x + threadIdx.x;
 	output[index] = firstInput[index] + secondInput[index] * mask[index];
@@ -49,8 +49,76 @@ __global__ void dotProductCuda(const float* firstInput, const float* secondInput
 	}
 }
 
+__global__ void dotProductWindowCuda(const float* firstInput, const float* secondInput, const int N, float* output)
+{
+	
+	// Dynamically allocate the share memory
+	int THREADS_PER_BLOCK = __cudaGet_blockDim().x;
+	__shared__ float sharedMemory[BLOCK_SIZE];
+	int multiplyX = blockDim.x * blockIdx.x + threadIdx.x;
+	sharedMemory[threadIdx.x] = firstInput[multiplyX] * secondInput[multiplyX % N];
+
+	int outIdx = (multiplyX - multiplyX % N) / N;
+	output[outIdx] = 4.0f;
+
+	// All of the threads must be done with the multiplication
+	__syncthreads();
+
+	
+
+	/*
+	
+	// Add the values in the block
+	if (threadIdx.x == 0)
+	{
+		for (int i = 0; i < N * outputSize; ++i)
+		{
+			output[multiplyX] = 4; // += sharedMemory[i];
+			// printf("%s", sharedMemory[i]);
+		}
+	}
+	*/
+	
+}
+
 namespace CudaFunctions
 {
+	void dotProductWindow(float* firstInput, float* secondInput, int N, float* output, int outputSize)
+	{
+		// Allocate memory for the CUDA operations
+		float* dFirstInput;
+		float* dSecondInput;
+		float* dOutput;
+		cudaMalloc((void**)& dFirstInput, N * outputSize * sizeof(float));
+		cudaMalloc((void**)& dSecondInput, N * sizeof(float));
+		cudaMalloc((void**)& dOutput, outputSize * sizeof(float));
+
+		// Copy the values to GPU
+		cudaMemcpy(dFirstInput, firstInput, N * outputSize * sizeof(float), cudaMemcpyHostToDevice);
+		cudaMemcpy(dSecondInput, secondInput, N * sizeof(float), cudaMemcpyHostToDevice);
+		//cudaMemcpy(dOutput, output, outputSize * sizeof(float), cudaMemcpyHostToDevice);
+
+		// Set the blocks to use
+		dim3 dimBlock(N * outputSize);
+		dim3 dimGrid(N * outputSize / BLOCK_SIZE + 1);
+
+		// Run the kernel
+		dotProductWindowCuda<<<dimGrid, dimBlock>>> (dFirstInput, dSecondInput, N, dOutput);
+		cudaDeviceSynchronize();
+
+		// Copy the values to host
+		cudaMemcpy(&output, dOutput, outputSize * sizeof(float), cudaMemcpyDeviceToHost);
+
+		cudaError_t error = cudaGetLastError();
+		if (error != cudaSuccess) {
+			fprintf(stderr, "ERROR: %s \n", cudaGetErrorString(error));
+			return;
+		}	
+
+		// Clean up the values
+		cudaFree(dFirstInput); cudaFree(dSecondInput); cudaFree(dOutput);
+	}
+
 	float dotProduct(float* firstInput, float* secondInput, int N)
 	{
 		// Allocate memory for the CUDA operations
@@ -58,9 +126,9 @@ namespace CudaFunctions
 		float* dFirstInput;
 		float* dSecondInput;
 		float* dOutput;
-		cudaMalloc((void**)& dFirstInput, N * sizeof(float));
-		cudaMalloc((void**)& dSecondInput, N * sizeof(float));
-		cudaMalloc((void**)& dOutput, sizeof(float));
+		cudaMalloc((void**)&dFirstInput, N * sizeof(float));
+		cudaMalloc((void**)&dSecondInput, N * sizeof(float));
+		cudaMalloc((void**)&dOutput, sizeof(float));
 
 		// Copy the values to GPU
 		cudaMemcpy(dFirstInput, firstInput, N * sizeof(float), cudaMemcpyHostToDevice);
@@ -71,7 +139,7 @@ namespace CudaFunctions
 		dim3 dimGrid(N / BLOCK_SIZE + 1);
 
 		// Run the kernel
-		dotProductCuda <<<dimGrid, dimBlock>>> (dFirstInput, dSecondInput, dOutput);
+		dotProductCuda << <dimGrid, dimBlock >> > (dFirstInput, dSecondInput, dOutput);
 		cudaDeviceSynchronize();
 
 		cudaError_t error = cudaGetLastError();
@@ -157,22 +225,22 @@ namespace CudaFunctions
 		cudaFree(dFirstInput); cudaFree(dSecondInput); cudaFree(dOutput);
 	}
 
-	void maskedAdd(float* firstInput, float* secondInput, float* mask, int N, float* output)
+	void maskedAdd(float* firstInput, float* secondInput, int* mask, int N, float* output)
 	{
 		// Allocate memory for the CUDA operations
 		float* dFirstInput;
 		float* dSecondInput;
 		float* dOutput;
-		float* dMask;
+		int* dMask;
 		cudaMalloc((void**)& dFirstInput, N * sizeof(float));
 		cudaMalloc((void**)& dSecondInput, N * sizeof(float));
-		cudaMalloc((void**)& dMask, N * sizeof(float));
+		cudaMalloc((void**)& dMask, N * sizeof(int));
 		cudaMalloc((void**)& dOutput, N * sizeof(float));
 
 		// Copy the values to GPU
 		cudaMemcpy(dFirstInput, firstInput, N * sizeof(float), cudaMemcpyHostToDevice);
 		cudaMemcpy(dSecondInput, secondInput, N * sizeof(float), cudaMemcpyHostToDevice);
-		cudaMemcpy(dMask, mask, N * sizeof(float), cudaMemcpyHostToDevice);
+		cudaMemcpy(dMask, mask, N * sizeof(int), cudaMemcpyHostToDevice);
 
 		// Set the blocks to use
 		dim3 dimBlock(BLOCK_SIZE);

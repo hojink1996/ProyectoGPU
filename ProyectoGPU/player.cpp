@@ -83,9 +83,9 @@ void Player::assignStrategy(std::vector<float> strategy, int idx)
 	this->decisionAgent.assignStrategy(strategy, idx);
 }
 
-void Player::mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated)
+void Player::mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask)
 {
-	this->decisionAgent.mutateStrategyElementByIndexVector(indexesToBeMutated);
+	this->decisionAgent.mutateStrategyElementByIndexVector(noise, mask);
 }
 
 int Player::getStack()

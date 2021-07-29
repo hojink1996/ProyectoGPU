@@ -89,13 +89,11 @@ void GeneticAlgorithm::selectBest(float ratio)
 	{
 		// Convert score with Softplus so that all scores are positive
 		float rawScore = this->currentIndividuals[i].getScore();
-		//float convertedScore = std::log(1.0f + std::exp(rawScore));
 		scores.push_back(rawScore);
 	}
 
-	std::vector<float> output(this->numIndividuals, 1);
+	std::vector<float> output(this->numIndividuals, 0);
 	CudaFunctions::softplus(&scores[0], this->currentIndividuals.size(), &output[0]);
-
 
 	std::discrete_distribution<> distrib(output.begin(), output.end()); // Create the distribution
 	
@@ -139,16 +137,23 @@ void GeneticAlgorithm::mutate(float probab)
 	{
 		std::vector<float> strategy = (*this->currentIndividuals[i].getPlayer()).getStrategy();
 
-		std::vector<int> indexesToBeMutated = {};
+		std::random_device device_random;
+		std::default_random_engine generator(device_random());
+		std::normal_distribution<> distribution(0, 1);
+
+		std::vector<float> noise(strategy.size(), 0);
+		std::vector<int> mask(strategy.size(), 0); 
+
 		// Iterate over elements of the strategy array
 		for (int j = 0; j < strategy.size(); j++)
 		{
-			// Mutate (change sign) with probability 'probab'
+			noise.at(j) = distribution(generator);
 			int sample = rand() % 100;
-			if (sample < probabPercent)
-				indexesToBeMutated.push_back(j);
+			if (sample < 80)
+				mask.at(j) = 1;
 		}
-		this->currentIndividuals[i].mutateStrategyElementByIndexVector(indexesToBeMutated);
+
+		this->currentIndividuals[i].mutateStrategyElementByIndexVector(noise, mask);
 	}
 }
 

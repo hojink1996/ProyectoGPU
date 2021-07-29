@@ -16,6 +16,7 @@ using namespace std;
 
 void main()
 {
+	
 	int iniNumIndividuals = 100;
 	int numOpponents = 5;
 	int numGamesPerPair = 5;
@@ -32,4 +33,5 @@ void main()
 	}
 	
 	return;
+	
 }

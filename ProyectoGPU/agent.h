@@ -19,7 +19,7 @@ public:
 	// virtual Decision makeDecision(int minimumBet, int maximumBet) = 0;
 	virtual std::vector<float> getTheta() = 0;
 	virtual void assignStrategy(std::vector<float> strategy, int idx) = 0;
-	virtual void mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated) = 0;
+	virtual void mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask) = 0;
 };
 
 /*
@@ -33,7 +33,7 @@ public:
 	Decision makeDecision(int gameStateIdx, std::vector<float> state, float minRaise, float maxRaise);
 	std::vector<float> getTheta();
 	void assignStrategy(std::vector<float> strategy, int idx);
-	void mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated);
+	void mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask);
 };
 
 /*
@@ -51,5 +51,5 @@ public:
 	void printTheta();
 	std::vector<float> getTheta();
 	void assignStrategy(std::vector<float> strategy, int idx);
-	void mutateStrategyElementByIndexVector(std::vector<int> indexesToBeMutated);
+	void mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask);
 };
