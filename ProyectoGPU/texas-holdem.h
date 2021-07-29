@@ -7,6 +7,15 @@
 #include "straight-identifier.h"
 
 /*
+The state of a player is given by a set of parameters that we define. Currently, we consider 22 parameters
+for the state vector.
+*/
+struct State
+{
+	float values[21];
+};
+
+/*
 The different types of combinations that a hand + shared card combination can return in
 Texas Hold'em Poker.
 */
@@ -62,6 +71,7 @@ private:
 	int numPlayers{ 0 };
 	int currentlyPlayingPlayers{ 0 };
 	int dealerPosition{ 0 };
+	int lastBet = 0;
 	std::vector<bool> playerCurrentlyPlaying{};
 	std::vector<Player*> players;
 	std::array<Card, 5> sharedCards;
@@ -166,6 +176,13 @@ private:
 
 	bool allPlayersAllIn();
 	bool onlyOnePlayerLeft();
+
+	void addLastBetDelta(State& state);
+	void addMoneyLeftPlayer(State& state, int playerIndex);
+	void addMoneyLeftOponent(State& state, int playerIndex);
+	void addPlayerBetAmount(State& state, int playerIndex);
+	void addCurrentHandCards(State& state, int playerIndex);
+	void addCurrentHandSuits(State& state, int playerIndex);
 public:
 	TexasHoldem(int numPlayers, float startingStack, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier,
 		int smallBlindValue=1);
@@ -174,7 +191,7 @@ public:
 	void addPlayer(Player* player);
 	void setSharedCards(std::array<Card, 5>& sharedCards);
 	void playRound();
-	std::vector<float> getStateOfPlayer(int idx);
+	State getStateOfPlayer(int idx);
 	void playMultipleRounds(int numberOfRounds);
 
 };
