@@ -17,7 +17,7 @@ private:
 	float lastBet{ 0.0f };
 	Agent& decisionAgent;
 
-	std::vector<int> playerEarnings;
+	std::vector<float> playerEarnings;
 public:
 	Player(Agent& decisionAgent);
 	void addCardToHand(Card card, int position);
@@ -61,7 +61,7 @@ public:
 	@return:		A vector of length 'n', with 'n' being the number of rounds played by the player.
 					Each element in the vector represents the player's earning during one of these rounds.
 	*/
-	std::vector<int> getPlayerEarnings();
+	std::vector<float> getPlayerEarnings();
 
 	void bet(int amount);
 	void setPlayerStack(int newStack);

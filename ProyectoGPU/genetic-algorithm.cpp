@@ -1,6 +1,7 @@
 #include <iostream>
 #include <random>
 #include <cassert>
+#include <chrono>
 #include "genetic-algorithm.h"
 #include "agent.h"
 #include "texas-holdem.h"
@@ -75,6 +76,8 @@ void GeneticAlgorithm::evaluate()
 			this->currentIndividuals[randIdx].addPlayedCompetition();
 		}
 	}
+	float scoreDifference = this->currentIndividuals[0].getScore() - this->scoreOfTheBestAtPreviousEpoch;
+	std::cout << "Difference of score of the best individual: " << scoreDifference << std::endl;
 }
 
 void GeneticAlgorithm::selectBest(float ratio)
@@ -84,11 +87,19 @@ void GeneticAlgorithm::selectBest(float ratio)
 	
 	// Create discrete distribution given by the score of each individual
 	std::vector<float> scores;
+	int maxIdx;
+	float maxScore = -2000;
 	for (int i = 0; i < this->currentIndividuals.size(); i++)
 	{
 		// Convert score with Softplus so that all scores are positive
 		float rawScore = this->currentIndividuals[i].getScore() / (this->currentIndividuals[i].getNumPlayedCompetitions());
 		scores.push_back(rawScore);
+		if (rawScore > maxScore)
+		{
+			maxScore = rawScore;
+			this->scoreOfTheBestAtPreviousEpoch = rawScore;
+			maxIdx = i;
+		}
 	}
 
 	std::vector<float> transformedScores(this->numIndividuals, 0);
@@ -96,13 +107,14 @@ void GeneticAlgorithm::selectBest(float ratio)
 
 	std::discrete_distribution<> distrib(transformedScores.begin(), transformedScores.end()); // Create the distribution
 
+	// Elitism: the individual with the highest score always survives in this selection
+	std::vector<Individual> newIndividuals = {*this->currentIndividuals[maxIdx].clone()};
+	
 	// Sample from the distribution
-	std::vector<Individual> newIndividuals;
 	float meanScore = 0;
 	int nextGenerationSize = (int)(ratio * this->numIndividuals);
 	
-	std::vector<std::vector<float>> sampledStrategies;
-	for (int i = 0; i < nextGenerationSize; i++)
+	for (int i = 0; i < nextGenerationSize - 1; i++) // -1 because we already saved one individual in the next generation
 	{
 		int randIdx = distrib(generator);
 		Individual* newIndividual = this->currentIndividuals[randIdx].clone();
@@ -122,7 +134,8 @@ void GeneticAlgorithm::selectBest(float ratio)
 
 void GeneticAlgorithm::crossOver()
 {
-	for (int i = 0; i < this->numIndividuals - 1; i += 2)  // if 'numIndividuals' is odd, the last individual is skipped
+	// Starting from i=1 because the best individual (at position 0) has to be kept
+	for (int i = 1; i < this->numIndividuals - 1; i += 2)  // if 'numIndividuals' is odd, the last individual is skipped
 	{
 		std::vector<float> strategy = (*this->currentIndividuals[i].getPlayer()).getStrategy();
 		std::vector<float> strategy2 = (*this->currentIndividuals[i + 1].getPlayer()).getStrategy();
@@ -138,7 +151,9 @@ void GeneticAlgorithm::mutate(float probab)
 	assert(probab <= 1.0f && probab >= 0.0f);
 
 	int probabPercent = (int)probab * 00;
-	for (int i = 0; i < this->numIndividuals; i++)  // if 'numIndividuals' is odd, the last individual is skipped
+
+	// Starting from i=1 because the best individual (at position 0) has to be kept
+	for (int i = 1; i < this->numIndividuals; i++)  // if 'numIndividuals' is odd, the last individual is skipped
 	{
 		std::vector<float> strategy = (*this->currentIndividuals[i].getPlayer()).getStrategy();
 

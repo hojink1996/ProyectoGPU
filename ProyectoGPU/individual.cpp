@@ -40,7 +40,7 @@ float Individual::getScore()
 
 void Individual::updateScore()
 {
-	std::vector<int> earnings = this->player.getPlayerEarnings();
+	std::vector<float> earnings = this->player.getPlayerEarnings();
 	
 	// Compute mean of earnings and add to score
 	if (earnings.size() != 0)

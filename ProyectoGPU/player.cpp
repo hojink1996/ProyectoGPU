@@ -69,10 +69,10 @@ void Player::decreaseStackSize(int decreaseValue)
 
 void Player::addPlayerEarnings(int earnings, int startingStack)
 {
-	this->playerEarnings.push_back(earnings + this->stack - startingStack);
+	this->playerEarnings.push_back((float)(earnings + this->stack - startingStack)/(float)startingStack);
 }
 
-std::vector<int> Player::getPlayerEarnings()
+std::vector<float> Player::getPlayerEarnings()
 {
 	return this->playerEarnings;
 }
