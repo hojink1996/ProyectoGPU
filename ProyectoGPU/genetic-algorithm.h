@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <chrono>
 #include "individual.h"
 
 
@@ -9,6 +10,7 @@ private:
 	int numIndividuals, numOpponents, numGamesPerPair;
 	std::vector<Individual> newIndividuals;
 	std::vector<Individual> currentIndividuals;
+	std::vector<std::chrono::seconds> timePerGeneration;
 	void compete(Individual& player1, Individual& player2);
 	void resetIndividuals();
 
@@ -18,6 +20,7 @@ public:
 	void selectBest(float ratio);
 	void crossOver();
 	void mutate(float probab);
+	std::vector<std::chrono::seconds> getTimePerGeneration();
 
 	int getNumIndividuals();
 	std::vector<float> getIndividualStrategyByIndex(int idx);

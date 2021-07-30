@@ -15,6 +15,7 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 	this->numIndividuals = iniNumIndividuals;
 	this->numOpponents = numOpponents;
 	this->numGamesPerPair = numGamesPerPair;
+	this->timePerGeneration = {};
 	
 	for (int i = 0; i < this->numIndividuals; i++) 
 	{
@@ -179,6 +180,7 @@ Individual GeneticAlgorithm::getIndividualByIndex(int idx)
 
 void GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
 {
+	auto preRun = std::chrono::high_resolution_clock::now();
 	std::cout << "Evaluating..." << std::endl;
 	this->evaluate();
 
@@ -190,8 +192,15 @@ void GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
 
 	std::cout << "Mutating..." << std::endl;
 	this->mutate(mutateProbab);
+	auto afterRun = std::chrono::high_resolution_clock::now();
+	this->timePerGeneration.push_back(std::chrono::duration_cast<std::chrono::seconds>(afterRun - preRun));
 
 	this->resetIndividuals();
 }
 
+
+std::vector<std::chrono::seconds> GeneticAlgorithm::getTimePerGeneration()
+{
+	return this->timePerGeneration;
+}
 
