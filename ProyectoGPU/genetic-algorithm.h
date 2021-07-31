@@ -14,12 +14,12 @@ private:
 	std::vector<std::chrono::seconds> timePerGeneration;
 	void compete(Individual& player1, Individual& player2);
 	void resetIndividuals();
-	void evaluatePairOfPlayers();
 	float scoreOfTheBestAtPreviousEpoch = 0;
 
 public:
 	GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair = 10, int numThreads = 20);
 	void evaluate();
+	void evaluatePairOfPlayers();
 	void selectBest(float ratio);
 	void crossOver();
 	void mutate(float probab);

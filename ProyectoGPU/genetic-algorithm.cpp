@@ -9,7 +9,7 @@
 #include "individual.h"
 #include "operations.cuh"
 
-GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair, int numThreads=10)
+GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair, int numThreads)
 {
 	assert(iniNumIndividuals > 1);
 	assert(numOpponents > 0);
@@ -84,14 +84,15 @@ void GeneticAlgorithm::evaluatePairOfPlayers()
 	this->currentIndividuals[firstIndividualIndex].endPlaying();
 	this->currentIndividuals[secondIndividualIndex].endPlaying();
 }
+
 void GeneticAlgorithm::evaluate()
 {
 	// Make players to play against numOpponent players
 	ThreadPool thread_pool(this->numThreads);
 	for (int i = 0; i < this->numIndividuals; i++)
 	{
-		for (int j = 0; j < this->numOpponents; j++) {
-			thread_pool.enqueue(this->evaluatePairOfPlayers);
+		for (int j = 0; j < this->numOpponents; j++){
+			thread_pool.enqueue([](GeneticAlgorithm *ga) {(*ga).evaluatePairOfPlayers(); }, this);
 		}
 	}
 	float scoreDifference = this->currentIndividuals[0].getScore() - this->scoreOfTheBestAtPreviousEpoch;
