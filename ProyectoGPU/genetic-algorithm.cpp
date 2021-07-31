@@ -234,9 +234,13 @@ void GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
 	this->resetIndividuals();
 }
 
-
 std::vector<std::chrono::seconds> GeneticAlgorithm::getTimePerGeneration()
 {
 	return this->timePerGeneration;
+}
+
+std::vector<Individual> GeneticAlgorithm::getCurrentIndividuals()
+{
+	return this->currentIndividuals;
 }
 

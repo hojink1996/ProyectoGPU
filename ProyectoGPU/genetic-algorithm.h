@@ -31,4 +31,5 @@ public:
 	void trainOneEpoch(float selectBestRatio, float mutateProbab);
 
 	void evaluatePairOfPlayers();
+	std::vector<Individual> getCurrentIndividuals();
 };
