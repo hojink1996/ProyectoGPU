@@ -112,15 +112,6 @@ Decision LinearAgent::makeDecision(int gameStateIdx, State& state, int minRaise,
 	int offset = gameStateIdx * stateSize;  // Offset to operate with the theta corresponding to the current game state
 	std::vector<float> result(4, 0);  // fold, call, raise
 	CudaFunctions::dotProductWindow(&this->theta[offset], &state.values[0], stateSize, &result[0], result.size());
-	
-	// Compute softmax
-	/*
-	float normalizingConstant = exp(result[0]) + exp(result[1]) + exp(result[2]);
-	for (int i = 0 ; i < 3; i++)
-	{
-		result[i] = exp(result[i]) / normalizingConstant;
-	}
-	*/
 
 	// Get argmax
 	int maxIdx = std::distance(result.begin(), std::max_element(result.begin(), result.end()));

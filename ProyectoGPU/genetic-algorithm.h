@@ -11,6 +11,7 @@ private:
 	std::vector<Individual> currentIndividuals;
 	void compete(Individual& player1, Individual& player2);
 	void resetIndividuals();
+	float scoreOfTheBestAtPreviousEpoch = 0;
 
 public:
 	GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair=10);

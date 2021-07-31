@@ -822,18 +822,18 @@ void TexasHoldem::addLastBetDelta(State& state)
 void TexasHoldem::addMoneyLeftPlayer(State& state, int playerIndex)
 {
 	int moneyLeft = this->players.at(playerIndex)->getStack();
-	state.values[1] = moneyLeft;
+	state.values[1] = (float)moneyLeft / (float)this->startingStack;
 }
 
 void TexasHoldem::addMoneyLeftOponent(State& state, int playerIndex)
 {
 	int moneyLeft = this->players.at((playerIndex - 1 + this->numPlayers) % this->numPlayers)->getStack();
-	state.values[2] = moneyLeft;
+	state.values[2] = (float)moneyLeft / (float)this->startingStack;
 }
 
 void TexasHoldem::addPlayerBetAmount(State& state, int playerIndex)
 {
-	state.values[3] = this->currentTotalBetAmount;
+	state.values[3] = (float)this->currentTotalBetAmount / (float)this->startingStack;
 }
 
 void TexasHoldem::addCurrentHandCards(State& state, int playerIndex)

@@ -29,7 +29,7 @@ __global__ void softplusKernel(const float* input, float* output)
 
 __global__ void dotProductCuda(const float* firstInput, const float* secondInput, float* output)
 {
-	// Dynamically allocate the share memory
+	// Dynamically allocate the shared memory
 	int THREADS_PER_BLOCK = __cudaGet_blockDim().x;
 	__shared__ float sharedMemory[BLOCK_SIZE];
 	int multiplyX = blockDim.x * blockIdx.x + threadIdx.x;
@@ -45,7 +45,6 @@ __global__ void dotProductCuda(const float* firstInput, const float* secondInput
 		for (int i = 0; i < THREADS_PER_BLOCK; ++i)
 		{
 			blockProduct += sharedMemory[i];
-			// printf("%s", sharedMemory[i]);
 		}
 		atomicAdd(output, blockProduct);
 	}
@@ -53,12 +52,10 @@ __global__ void dotProductCuda(const float* firstInput, const float* secondInput
 
 __global__ void dotProductWindowCuda(const float* firstInput, const float* secondInput, const int N, float* output)
 {
-	// Dynamically allocate the share memory
-	//int THREADS_PER_BLOCK = __cudaGet_blockDim().x;
+	// Dynamically allocate the shared memory
 	__shared__ float sharedMemory[BLOCK_SIZE];
 	int multiplyX = blockDim.x * blockIdx.x + threadIdx.x;
 	sharedMemory[threadIdx.x] = firstInput[multiplyX] * secondInput[multiplyX % N];
-	//printf(" (%i) %f * %f  = %f \n", multiplyX, firstInput[multiplyX], secondInput[multiplyX % N], sharedMemory[threadIdx.x]);
 
 	int tIdx = threadIdx.x;
 
@@ -72,9 +69,8 @@ __global__ void dotProductWindowCuda(const float* firstInput, const float* secon
 		for (int i = 0; i < BLOCK_SIZE; ++i)
 		{
 			output[(offset + i) / N] += sharedMemory[i];
-		 }
-	}	
-	__syncthreads();
+		}
+	}
 
 	//printf("(%i) out: %f, %f, %f, %f\n", multiplyX, output[0], output[1], output[2], output[3]);
 }
