@@ -1,11 +1,16 @@
 #include <numeric>
 #include "individual.h"
+#include <mutex>
+#include <thread>
+
+std::mutex mtx;
 
 Individual::Individual(Player* player) : player(*player)
 {
 	this->playerPointer = player;
 	this->numPlayedCompetitions = 0;
 	this->score = 0.0f;
+	this->currentlyPlaying = false;
 }
 
 void Individual::addPlayedCompetition()
@@ -60,4 +65,27 @@ Individual* Individual::clone()
 	LinearAgent* newAgent = new LinearAgent(theta);
 	Individual* ind = new Individual(new Player(*newAgent));
 	return ind;
+}
+
+void Individual::beginPlaying()
+{
+	mtx.lock();
+	this->currentlyPlaying = true;
+	mtx.unlock();
+}
+
+void Individual::endPlaying()
+{
+	mtx.lock();
+	this->currentlyPlaying = false;
+	mtx.unlock();
+}
+
+bool Individual::isCurrentlyPlaying()
+{
+	mtx.lock();
+	bool isCurrentlyPlaying = this->currentlyPlaying;
+	mtx.unlock();
+
+	return isCurrentlyPlaying;
 }
