@@ -51,6 +51,7 @@ private:
 	/*
 	Internal private parameters needed for the class.
 	*/
+	bool printPlaysAndHands;
 	Deck& currentDeck;
 	StraightIdentifier& straightIdentifier;
 	GameState currentGameState;
@@ -175,10 +176,15 @@ private:
 	void addPlayerBetAmount(State& state, int playerIndex);
 	void addCurrentHandCards(State& state, int playerIndex);
 	void addCurrentHandSuits(State& state, int playerIndex);
+	void printPlayerHand(int playerIndex);
+	void printSharedCards();
+	std::string suitToString(Suit suit);
+	std::string valueToString(Value value);
 public:
 	TexasHoldem(int numPlayers, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier, int startingStack=1000,
-		int smallBlindValue=1);
-	TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, float startingStack=1000, int smallBlindValue=1);
+		int smallBlindValue=1, bool printPlaysAndHands=false);
+	TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, float startingStack=1000, int smallBlindValue=1, 
+		bool printPlaysAndHands = false);
 	HandValue evaluateHand(Hand& hand, uint64_t& handValue);
 	void addPlayer(Player* player);
 	void setSharedCards(std::array<Card, 5>& sharedCards);

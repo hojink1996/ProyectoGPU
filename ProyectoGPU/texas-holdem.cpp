@@ -8,9 +8,12 @@
 #include <cassert>
 
 TexasHoldem::TexasHoldem(int numPlayers, Agent& decisionAgent, Deck& deck,
-	StraightIdentifier& straightIdentifier, int startingStack, int smallBlindValue) : currentDeck(deck), straightIdentifier(straightIdentifier)
+	StraightIdentifier& straightIdentifier, int startingStack, int smallBlindValue,
+	bool printPlaysAndHands) : currentDeck(deck), straightIdentifier(straightIdentifier)
 {
+	deck.reset();
 	this->startingStack = startingStack;
+	this->printPlaysAndHands = printPlaysAndHands;
 	this->dealerPosition = 0;
 	this->currentGameState = GameState::Invalid;
 	this->numPlayers = numPlayers;
@@ -33,8 +36,10 @@ TexasHoldem::TexasHoldem(int numPlayers, Agent& decisionAgent, Deck& deck,
 Constructor without specifying number of players.
 */
 TexasHoldem::TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, float startingStack,
-	int smallBlindValue) : currentDeck(deck), straightIdentifier(straightIdentifier)
+	int smallBlindValue, bool printPlaysAndHands) : currentDeck(deck), straightIdentifier(straightIdentifier)
 {
+	deck.reset();
+	this->printPlaysAndHands = printPlaysAndHands;
 	this->startingStack = startingStack;
 	this->numPlayers = 0;
 	this->dealerPosition = 0;
@@ -80,6 +85,8 @@ void TexasHoldem::dealCards()
 
 void TexasHoldem::drawFlop()
 {
+	if (this->printPlaysAndHands)
+		std::cout << "FLOP\n\n";
 	this->currentGameState = GameState::Flop;
 	if (this->onlyOnePlayerLeft())
 		return;
@@ -89,6 +96,8 @@ void TexasHoldem::drawFlop()
 
 void TexasHoldem::drawTurn()
 {
+	if (this->printPlaysAndHands)
+		std::cout << "TURN\n\n";
 	this->currentGameState = GameState::Turn;
 	if (this->onlyOnePlayerLeft())
 		return;
@@ -97,6 +106,8 @@ void TexasHoldem::drawTurn()
 
 void TexasHoldem::drawRiver()
 {
+	if (this->printPlaysAndHands)
+		std::cout << "RIVER\n\n";
 	this->currentGameState = GameState::River;
 	if (this->onlyOnePlayerLeft())
 		return;
@@ -119,6 +130,8 @@ void TexasHoldem::resetPlayers()
 
 void TexasHoldem::beginRound()
 {
+	if (this->printPlaysAndHands)
+		std::cout << "PRE-FLOP\n\n";
 	this->currentlyPlayingPlayers = this->numPlayers;
 	this->currentTotalBetAmount = 0;
 	for (int index = 0; index < this->playerCurrentlyPlaying.size(); ++index)
@@ -673,6 +686,108 @@ void TexasHoldem::playRound()
 	this->endRound();
 }
 
+std::string TexasHoldem::suitToString(Suit suit)
+{
+	std::string outputText;
+	switch (suit)
+	{
+	case Suit::Clubs:
+		outputText = "Clubs";
+		break;
+	case Suit::Diamonds:
+		outputText = "Diamonds";
+		break;
+	case Suit::Hearts:
+		outputText = "Hearts";
+		break;
+	case Suit::Spades:
+		outputText = "Spades";
+		break;
+	case Suit::Invalid:
+		outputText = "Invalid";
+		break;
+	default:
+		break;
+	}
+	return outputText;
+}
+
+std::string TexasHoldem::valueToString(Value value)
+{
+	std::string outputText;
+	switch (value)
+	{
+	case Value::Ace:
+		outputText = "A";
+		break;
+	case Value::Two:
+		outputText = "2";
+		break;
+	case Value::Three:
+		outputText = "3";
+		break;
+	case Value::Four:
+		outputText = "4";
+		break;
+	case Value::Five:
+		outputText = "5";
+		break;
+	case Value::Six:
+		outputText = "6";
+		break;
+	case Value::Seven:
+		outputText = "7";
+		break;
+	case Value::Eight:
+		outputText = "8";
+		break;
+	case Value::Nine:
+		outputText = "9";
+		break;
+	case Value::Ten:
+		outputText = "10";
+		break;
+	case Value::Jack:
+		outputText = "J";
+		break;
+	case Value::Queen:
+		outputText = "Q";
+		break;
+	case Value::King:
+		outputText = "K";
+		break;
+	case Value::Invalid:
+		outputText = "Invalid";
+		break;
+	default:
+		break;
+	}
+	return outputText;
+}
+
+void TexasHoldem::printPlayerHand(int playerIndex)
+{
+	Player player = *this->players.at(playerIndex);
+	Hand playerHand = player.getHand();
+	std::cout << "== Player " << playerIndex << " Hand ==\n";
+	for (auto card : playerHand.getHand())
+	{
+		std::cout << this->valueToString(card.second) << "-" << this->suitToString(card.first) << "\n";
+	}
+	std::cout << "\n";
+}
+
+void TexasHoldem::printSharedCards()
+{
+	std::array<Card, 5> sharedCards = this->sharedCards;
+	std::cout << "== Shared Cards ==\n";
+	for (auto card : sharedCards)
+	{
+		std::cout << this->valueToString(card.second) << "-" << this->suitToString(card.first) << "\n";
+	}
+	std::cout << "\n";
+}
+
 void TexasHoldem::playMultipleRounds(int numberOfRounds)
 {
 	for (int round = 0; round < numberOfRounds; ++round)
@@ -746,6 +861,11 @@ void TexasHoldem::bettingRound()
 
 	while (true)
 	{
+		if (this->printPlaysAndHands)
+		{
+			this->printPlayerHand(currentPosition);
+			this->printSharedCards();
+		}
 		if (this->currentlyPlayingPlayers == 1)
 			break;
 		if (this->playerCurrentlyPlaying.at(currentPosition))
@@ -757,6 +877,10 @@ void TexasHoldem::bettingRound()
 
 			if (currentPlayerDecision.play == Play::Raise)
 			{
+				if (this->printPlaysAndHands)
+				{
+					std::cout << "The player raises: " << currentPlayerDecision.betAmount << std::endl;
+				}
 				assert(currentPlayerDecision.betAmount + soFarBetValue <= (*this->players.at(currentPosition)).getStack());
 
 				soFarBetValue += currentPlayerDecision.betAmount;
@@ -766,6 +890,10 @@ void TexasHoldem::bettingRound()
 			}
 			else if (currentPlayerDecision.play == Play::Call)
 			{
+				if (this->printPlaysAndHands)
+				{
+					std::cout << "The player calls." << std::endl;
+				}
 				assert(soFarBetValue <= (*this->players.at(currentPosition)).getStack());
 
 				//currentPlayerBets.at(currentPosition) += currentBetValue;
@@ -776,6 +904,10 @@ void TexasHoldem::bettingRound()
 			}
 			else
 			{
+				if (this->printPlaysAndHands)
+				{
+					std::cout << "The player folds." << std::endl;
+				}
 				--this->currentlyPlayingPlayers;
 				this->lastBet = 0;
 				this->playerCurrentlyPlaying.at(currentPosition) = false;

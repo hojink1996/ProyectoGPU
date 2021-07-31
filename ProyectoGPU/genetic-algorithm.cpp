@@ -108,7 +108,7 @@ void GeneticAlgorithm::selectBest(float ratio)
 	
 	// Create discrete distribution given by the score of each individual
 	std::vector<float> scores;
-	int maxIdx;
+	int maxIdx = 0;
 	float maxScore = -2000;
 	for (int i = 0; i < this->currentIndividuals.size(); i++)
 	{

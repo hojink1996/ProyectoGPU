@@ -31,6 +31,67 @@ void LinearAgent::assignStrategy(std::vector<float> strategy, int idx)
 	}
 }
 
+InputAgent::InputAgent()
+{
+
+}
+
+Decision InputAgent::makeDecision(int gameStateIdx, State& state, int minRaise, int maxRaise)
+{
+	bool definedPlay = false;
+	int raiseAmount{ 0 };
+	char play;
+	Play currentPlay;
+	while (!definedPlay)
+	{
+		std::cout << "Input the play you want to make (f for Fold, c for Call, r for Raise): ";
+		std::cin >> play;
+
+		switch (play)
+		{
+		case 'f':
+			currentPlay = Play::Fold;
+			definedPlay = true;
+			break;
+		case 'c':
+			currentPlay = Play::Call;
+			definedPlay = true;
+			break;
+		case 'r':
+			currentPlay = Play::Raise;
+			definedPlay = true;
+			break;
+		default:
+			break;
+		}
+	}
+	if (currentPlay == Play::Raise)
+	{
+		std::cout << "Input the amount you want to raise. (Min=" << minRaise << ", Max=" << maxRaise << "):";
+		std::cin >> raiseAmount;
+		if (raiseAmount < minRaise)
+			raiseAmount = minRaise;
+		if (raiseAmount > maxRaise)
+			raiseAmount = maxRaise;
+	}
+	Decision outputDecision{ currentPlay, raiseAmount };
+	return outputDecision;
+}
+
+std::vector<float> InputAgent::getTheta()
+{
+	return {};
+}
+
+void InputAgent::assignStrategy(std::vector<float> strategy, int idx)
+{
+
+}
+
+void InputAgent::mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask)
+{
+
+}
 
 RandomAgent::RandomAgent()
 {

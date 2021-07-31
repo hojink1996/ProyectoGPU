@@ -37,6 +37,16 @@ public:
 	void mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask);
 };
 
+class InputAgent : public Agent
+{
+public:
+	InputAgent();
+	Decision makeDecision(int gameStateIdx, State& state, int minRaise, int maxRaise);
+	std::vector<float> getTheta();
+	void assignStrategy(std::vector<float> strategy, int idx);
+	void mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask);
+};
+
 /*
 LinearAgent: Agent that makes decision given a linear combination with its parameters.
 */

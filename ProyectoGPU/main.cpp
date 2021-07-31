@@ -15,6 +15,7 @@
 
 using namespace std;
 
+/*
 void main()
 {
 	
@@ -70,4 +71,28 @@ void main()
 
 	return;
 	
+}
+*/
+
+void main()
+{
+	std::vector<float> linearIndividual;
+	int individual = 2;
+	int epoch = 100;
+	int NUMBER_OF_ITEMS = 21;
+	ifstream data_file;      // NOW it's ifstream
+	data_file.open("individual_" + std::to_string(individual) + "epoch_" + std::to_string(epoch) + ".bin", ios::in | ios::binary);
+	linearIndividual.resize(NUMBER_OF_ITEMS);
+	data_file.read(reinterpret_cast<char*>(&linearIndividual[0]), NUMBER_OF_ITEMS * sizeof(float));
+	data_file.close();
+	LinearAgent agent = LinearAgent(linearIndividual);
+	Player player = Player(agent);
+	Deck deck = Deck();
+	StraightIdentifier identifier = StraightIdentifier();
+	TexasHoldem game = TexasHoldem(deck, identifier, 100.0f, 1, true);
+	game.addPlayer(&player);
+	InputAgent playerAgent = InputAgent();
+	Player inputPlayer = Player(playerAgent);
+	game.addPlayer(&inputPlayer);
+	game.playMultipleRounds(5);
 }
