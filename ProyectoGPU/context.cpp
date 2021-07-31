@@ -4,8 +4,9 @@
 
 using namespace std;
 
-Context::Context()
+Context::Context(bool parallelize=true)
 {
+	this->parallelize = parallelize;
 }
 
 void Context::run()

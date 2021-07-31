@@ -55,8 +55,10 @@ void GeneticAlgorithm::evaluate()
 	// Make players to play against numOpponent players
 	for (int i = 0; i < this->numIndividuals; i++)
 	{
+		std::cout << i << " - ";
 		for (int j = 0; j < this->numOpponents; j++) {
 
+			// std::cout << j << " ";
 			// Sample a random opponent (of course different than i)
 			int randIdx = rand() % this->numIndividuals;
 			while (randIdx == i)

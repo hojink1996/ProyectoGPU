@@ -5,7 +5,8 @@
 class Context
 {
 private:
+	bool parallelize = true;
 public:
-	Context();
+	Context(bool parallelize);
 	void run();
 };
