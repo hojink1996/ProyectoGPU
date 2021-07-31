@@ -853,7 +853,6 @@ void TexasHoldem::addCurrentHandCards(State& state, int playerIndex)
 	}
 	for (int cardIndex = 0; cardIndex < 13; ++cardIndex)
 	{
-		std::cout << cardIndex << std::endl;
 		state.values[4 + cardIndex] = numberOfCards[cardIndex];
 	}
 }
@@ -875,7 +874,6 @@ void TexasHoldem::addCurrentHandSuits(State& state, int playerIndex)
 	}
 	for (int cardIndex = 0; cardIndex < 4; ++cardIndex)
 	{
-		std::cout << cardIndex << std::endl;
 		state.values[17 + cardIndex] = numberOfSuits[cardIndex];
 	}
 }
