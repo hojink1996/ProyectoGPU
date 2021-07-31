@@ -13,7 +13,7 @@ class Player
 {
 private:
 	int stack;
-	Hand& hand{ Hand() };
+	Hand hand{ Hand() };
 	float lastBet{ 0.0f };
 	Agent& decisionAgent;
 

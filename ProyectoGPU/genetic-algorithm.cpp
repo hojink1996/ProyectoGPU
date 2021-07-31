@@ -56,7 +56,6 @@ void GeneticAlgorithm::evaluatePairOfPlayers()
 {
 	//std::cout << "Second:" << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
 
-	std::cout << "HOLA" << std::endl;
 	// Select the first player
 	int firstIndividualIndex = rand() % this->numIndividuals;
 	while (this->currentIndividuals[firstIndividualIndex].isCurrentlyPlaying())

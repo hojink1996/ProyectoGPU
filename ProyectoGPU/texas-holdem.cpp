@@ -842,6 +842,11 @@ void TexasHoldem::addCurrentHandCards(State& state, int playerIndex)
 	int numberOfCards[13] = {};
 	for (Card card : hand.getHand())
 	{
+		if (static_cast<int>(card.second) == 13)
+		{
+			std::cout << "Invalid hand" << std::endl;
+			break;
+		}
 		numberOfCards[static_cast<int>(card.second)] += 1;
 	}
 	for (Card card : this->sharedCards)
@@ -863,6 +868,8 @@ void TexasHoldem::addCurrentHandSuits(State& state, int playerIndex)
 	int numberOfSuits[4] = {};
 	for (Card card : hand.getHand())
 	{
+		if (static_cast<int>(card.first)== 4)
+			break;
 		numberOfSuits[static_cast<int>(card.first)] += 1;
 	}
 	for (Card card : this->sharedCards)
