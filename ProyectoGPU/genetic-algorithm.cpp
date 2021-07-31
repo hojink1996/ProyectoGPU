@@ -2,17 +2,19 @@
 #include <random>
 #include <cassert>
 #include <chrono>
+#include "ThreadPool.h"
 #include "genetic-algorithm.h"
 #include "agent.h"
 #include "texas-holdem.h"
 #include "individual.h"
 #include "operations.cuh"
 
-GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair)
+GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair, int numThreads)
 {
 	assert(iniNumIndividuals > 1);
 	assert(numOpponents > 0);
 
+	this->numThreads = numThreads;
 	this->numIndividuals = iniNumIndividuals;
 	this->numOpponents = numOpponents;
 	this->numGamesPerPair = numGamesPerPair;
@@ -50,32 +52,50 @@ Evaluates the score of each individual.
 Each individual competes against 'numOpponents' random sampled individuals,
 and the score is the number of times that the individual won.
 */
+void GeneticAlgorithm::evaluatePairOfPlayers()
+{
+	//std::cout << "Second:" << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
+
+	std::cout << "HOLA" << std::endl;
+	// Select the first player
+	int firstIndividualIndex = rand() % this->numIndividuals;
+	while (this->currentIndividuals[firstIndividualIndex].isCurrentlyPlaying())
+	{
+		firstIndividualIndex = rand() % this->numIndividuals;
+	}
+	this->currentIndividuals[firstIndividualIndex].beginPlaying();
+
+	// Select the second player
+	int secondIndividualIndex = rand() % this->numIndividuals;
+	while (this->currentIndividuals[secondIndividualIndex].isCurrentlyPlaying() ||  firstIndividualIndex == secondIndividualIndex)
+	{
+		secondIndividualIndex = rand() % this->numIndividuals;
+	}
+	this->currentIndividuals[secondIndividualIndex].beginPlaying();
+
+	// Let individuals compete
+	this->compete(this->currentIndividuals[firstIndividualIndex], this->currentIndividuals[secondIndividualIndex]);
+	
+	// Update individuals' score after the competition
+	this->currentIndividuals[firstIndividualIndex].updateScore();
+	this->currentIndividuals[secondIndividualIndex].updateScore();
+	
+	// Add  to number of played games
+	this->currentIndividuals[firstIndividualIndex].addPlayedCompetition();
+	this->currentIndividuals[secondIndividualIndex].addPlayedCompetition();
+	
+	this->currentIndividuals[firstIndividualIndex].endPlaying();
+	this->currentIndividuals[secondIndividualIndex].endPlaying();
+}
+
 void GeneticAlgorithm::evaluate()
 {
 	// Make players to play against numOpponent players
+	ThreadPool thread_pool(this->numThreads);
 	for (int i = 0; i < this->numIndividuals; i++)
 	{
-		std::cout << i << " - ";
-		for (int j = 0; j < this->numOpponents; j++) {
-
-			// std::cout << j << " ";
-			// Sample a random opponent (of course different than i)
-			int randIdx = rand() % this->numIndividuals;
-			while (randIdx == i)
-			{
-				randIdx = rand() % this->numIndividuals;
-			}
-
-			// Let individuals compete
-			this->compete(this->currentIndividuals[i], this->currentIndividuals[randIdx]);
-			
-			// Update individuals' score after the competition
-			this->currentIndividuals[i].updateScore();
-			this->currentIndividuals[randIdx].updateScore();
-			
-			// Add  to number of played games
-			this->currentIndividuals[i].addPlayedCompetition();
-			this->currentIndividuals[randIdx].addPlayedCompetition();
+		for (int j = 0; j < this->numOpponents; j++){
+			thread_pool.enqueue([](GeneticAlgorithm *ga) {(*ga).evaluatePairOfPlayers(); }, this);
 		}
 	}
 	float scoreDifference = this->currentIndividuals[0].getScore() - this->scoreOfTheBestAtPreviousEpoch;

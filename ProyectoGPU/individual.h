@@ -6,6 +6,7 @@ private:
 	Player& player;
 	Player* playerPointer;
 	int numPlayedCompetitions;
+	bool currentlyPlaying;
 	float score;
 public:
 	Individual(Player* player);
@@ -16,6 +17,9 @@ public:
 	float getScore();
 	void crossOver(std::vector<float> strategy, int idx);
 	void mutateStrategyElementByIndexVector(std::vector<float> noise, std::vector<int> mask);
+	void beginPlaying();
+	void endPlaying();
+	bool isCurrentlyPlaying();
 
 	void reset();
 	Individual* clone();

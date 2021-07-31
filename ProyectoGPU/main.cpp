@@ -20,7 +20,7 @@ void main()
 	int iniNumIndividuals = 100;
 	int numOpponents = 10;
 	int numGamesPerPair = 10;
-	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair);
+	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair, 16);
 
 	float selectBestRatio = 1.0;
 	float mutateProbab = 0.1;

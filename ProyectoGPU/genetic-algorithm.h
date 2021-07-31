@@ -14,9 +14,10 @@ private:
 	void compete(Individual& player1, Individual& player2);
 	void resetIndividuals();
 	float scoreOfTheBestAtPreviousEpoch = 0;
+	int numThreads;
 
 public:
-	GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair=10);
+	GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair=10, int numThreads=8);
 	void evaluate();
 	void selectBest(float ratio);
 	void crossOver();
@@ -28,4 +29,6 @@ public:
 	Individual getIndividualByIndex(int idx);
 
 	void trainOneEpoch(float selectBestRatio, float mutateProbab);
+
+	void evaluatePairOfPlayers();
 };
