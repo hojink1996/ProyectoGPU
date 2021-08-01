@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string>
 #include "deck.h"
 #include "player.h"
 #include "card.h"
@@ -51,7 +52,7 @@ private:
 	/*
 	Internal private parameters needed for the class.
 	*/
-	bool printPlaysAndHands;
+	bool print;
 	Deck& currentDeck;
 	StraightIdentifier& straightIdentifier;
 	GameState currentGameState;
@@ -182,9 +183,9 @@ private:
 	std::string valueToString(Value value);
 public:
 	TexasHoldem(int numPlayers, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier, int startingStack=1000,
-		int smallBlindValue=1, bool printPlaysAndHands=false);
+		int smallBlindValue=1, bool print=false);
 	TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, float startingStack=1000, int smallBlindValue=1, 
-		bool printPlaysAndHands = false);
+		bool print=false);
 	HandValue evaluateHand(Hand& hand, uint64_t& handValue);
 	void addPlayer(Player* player);
 	void setSharedCards(std::array<Card, 5>& sharedCards);

@@ -13,9 +13,17 @@
 #include "../ProyectoGPU/context.h"
 #include "operations.cuh"
 
+
+void saveLoss(int epoch, const std::string& text)
+{
+	std::ofstream log_file(
+		"logs/loss.txt", std::ios_base::out | std::ios_base::app);
+	log_file << "Epoch " << epoch << " - " << text << std::endl;
+}
+
 using namespace std;
 
-/*
+
 void main()
 {
 	
@@ -23,7 +31,7 @@ void main()
 	int numOpponents = 5;
 	int numGamesPerPair = 20;
 	int saveEvery = 10;
-	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair, 32);
+	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair, 32, true);
 
 	float selectBestRatio = 1.0;
 	float mutateProbab = 0.1;
@@ -32,7 +40,11 @@ void main()
 	for (int i = 0; i < numEpochs; i++)
 	{
 		cout << "Epoch " << i << "/" << numEpochs << endl;
-		ga.trainOneEpoch(selectBestRatio, mutateProbab);
+
+		float loss = ga.trainOneEpoch(selectBestRatio, mutateProbab);
+		std::cout << "Difference of score of the best individual: " << loss << std::endl;
+		saveLoss(i, std::to_string(loss));
+
 		if ((i % saveEvery) == 0) {
 			std::cout << "Saving at epoch: " << i << std::endl;
 			int index = 0;
@@ -65,15 +77,14 @@ void main()
 	int epoch = 0;
 	for (auto time : times)
 	{
-		std::cout << "Epoch " << epoch << " took: " << time.count() << "seconds." << std::endl;
+		std::cout << "Epoch " << epoch << " took: " << time.count() << " s" << std::endl;
 		++epoch;
 	}
 
 	return;
 	
 }
-*/
-
+/*
 void main()
 {
 	std::vector<float> linearIndividual;
@@ -85,14 +96,17 @@ void main()
 	linearIndividual.resize(NUMBER_OF_ITEMS);
 	data_file.read(reinterpret_cast<char*>(&linearIndividual[0]), NUMBER_OF_ITEMS * sizeof(float));
 	data_file.close();
+
 	LinearAgent agent = LinearAgent(linearIndividual);
 	Player player = Player(agent);
 	Deck deck = Deck();
 	StraightIdentifier identifier = StraightIdentifier();
 	TexasHoldem game = TexasHoldem(deck, identifier, 100.0f, 1, true);
 	game.addPlayer(&player);
+
 	InputAgent playerAgent = InputAgent();
 	Player inputPlayer = Player(playerAgent);
 	game.addPlayer(&inputPlayer);
 	game.playMultipleRounds(5);
 }
+*/

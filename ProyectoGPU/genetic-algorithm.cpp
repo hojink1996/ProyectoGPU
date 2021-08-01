@@ -9,7 +9,7 @@
 #include "individual.h"
 #include "operations.cuh"
 
-GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair, int numThreads)
+GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair, int numThreads, bool training)
 {
 	assert(iniNumIndividuals > 1);
 	assert(numOpponents > 0);
@@ -19,6 +19,7 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 	this->numOpponents = numOpponents;
 	this->numGamesPerPair = numGamesPerPair;
 	this->timePerGeneration = {};
+	this->training = training;
 	
 	for (int i = 0; i < this->numIndividuals; i++) 
 	{
@@ -33,7 +34,7 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 void GeneticAlgorithm::compete(Individual& individual, Individual& individual2)
 {
 	// Create a game of TexasHoldem
-	TexasHoldem game = TexasHoldem(Deck(), StraightIdentifier());
+	TexasHoldem game = TexasHoldem(Deck(), StraightIdentifier(), 100, 1, !this->training);
 	game.addPlayer(individual.getPlayer());
 	game.addPlayer(individual2.getPlayer());
 	game.playMultipleRounds(this->numGamesPerPair);
@@ -87,7 +88,7 @@ void GeneticAlgorithm::evaluatePairOfPlayers()
 	this->currentIndividuals[secondIndividualIndex].endPlaying();
 }
 
-void GeneticAlgorithm::evaluate()
+float GeneticAlgorithm::evaluate()
 {
 	// Make players to play against numOpponent players
 	ThreadPool thread_pool(this->numThreads);
@@ -98,7 +99,7 @@ void GeneticAlgorithm::evaluate()
 		}
 	}
 	float scoreDifference = this->currentIndividuals[0].getScore() - this->scoreOfTheBestAtPreviousEpoch;
-	std::cout << "Difference of score of the best individual: " << scoreDifference << std::endl;
+	return scoreDifference;
 }
 
 void GeneticAlgorithm::selectBest(float ratio)
@@ -214,11 +215,11 @@ Individual GeneticAlgorithm::getIndividualByIndex(int idx)
 	return this->currentIndividuals.at(idx);
 }
 
-void GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
+float GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
 {
 	auto preRun = std::chrono::high_resolution_clock::now();
 	std::cout << "Evaluating..." << std::endl;
-	this->evaluate();
+	float scpreDifference = this->evaluate();
 
 	std::cout << "Selecting best individuals..." << std::endl;
 	this->selectBest(selectBestRatio);
@@ -228,10 +229,14 @@ void GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
 
 	std::cout << "Mutating..." << std::endl;
 	this->mutate(mutateProbab);
+
 	auto afterRun = std::chrono::high_resolution_clock::now();
-	this->timePerGeneration.push_back(std::chrono::duration_cast<std::chrono::seconds>(afterRun - preRun));
+	std::chrono::seconds epochTime = std::chrono::duration_cast<std::chrono::seconds>(afterRun - preRun);
+	this->timePerGeneration.push_back(epochTime);
+	std::cout << "Current epoch took: " << epochTime.count() << " s" << std::endl;
 
 	this->resetIndividuals();
+	return epochTime.count();
 }
 
 std::vector<std::chrono::seconds> GeneticAlgorithm::getTimePerGeneration()

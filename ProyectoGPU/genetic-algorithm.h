@@ -15,10 +15,11 @@ private:
 	void resetIndividuals();
 	float scoreOfTheBestAtPreviousEpoch = 0;
 	int numThreads;
+	bool training;
 
 public:
-	GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair=10, int numThreads=8);
-	void evaluate();
+	GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair=10, int numThreads=8, bool training=false);
+	float evaluate();
 	void selectBest(float ratio);
 	void crossOver();
 	void mutate(float probab);
@@ -28,7 +29,7 @@ public:
 	std::vector<float> getIndividualStrategyByIndex(int idx);
 	Individual getIndividualByIndex(int idx);
 
-	void trainOneEpoch(float selectBestRatio, float mutateProbab);
+	float trainOneEpoch(float selectBestRatio, float mutateProbab);
 
 	void evaluatePairOfPlayers();
 	std::vector<Individual> getCurrentIndividuals();
