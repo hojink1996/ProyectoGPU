@@ -27,23 +27,50 @@ void saveLoss(int epoch, const std::string& text)
 	log_file << "Epoch " << epoch << " - " << text << endl;
 }
 
+/*
+Write in the log file.
+*/
+void writeLog(const std::string& text)
+{
+	ofstream log_file("logs/loss.txt", ios_base::out | ios_base::app);
+	log_file << text << endl;
+}
+
 
 
 void main()
 {
-	int iniNumIndividuals = 5000;
+	int iniNumIndividuals = 1000;
 	int numOpponents = 5;
 	int numGamesPerPair = 20;
 	int saveEvery = 10;
 	int numThreads = 32;
 	bool training = true;
-	bool parallelize = false;
+	bool parallelize;
+	if (numThreads == 1)
+		parallelize = false;
+	else
+		parallelize = true;
 	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair, numThreads, training, parallelize);
+
+	cout << "Num individuals: " << iniNumIndividuals << endl;
+	cout << "Num opponents: " << numOpponents << endl;
+	cout << "Num games per pair: " << numGamesPerPair << endl;
+	cout << "Num threads: " << numThreads << endl;
+	cout << "Parallelize: " << parallelize << endl;
+
+	writeLog("\n------------------------------------\n");
+	writeLog("Num individuals: " + to_string(iniNumIndividuals));
+	writeLog("Num opponents: " + to_string(numOpponents));
+	writeLog("Num games per pair: " + to_string(numGamesPerPair));
+	writeLog("Num threads: " + to_string(numThreads));
+	writeLog("Parallelize: " + to_string(parallelize) + "\n");
+
 
 	float selectBestRatio = 1.0;
 	float mutateProbab = 0.1;
 
-	int numEpochs = 100;
+	int numEpochs = 1000;
 	for (int i = 0; i < numEpochs; i++)
 	{
 		cout << "Epoch " << i << "/" << numEpochs << endl;

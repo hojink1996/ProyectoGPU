@@ -202,7 +202,7 @@ void GeneticAlgorithm::mutate(float probab)
 {
 	assert(probab <= 1.0f && probab >= 0.0f);
 
-	int probabPercent = (int)probab * 00;
+	int probabPercent = (int) (probab * 100);
 
 	// Starting from i=1 because the best individual (at position 0) has to be kept
 	for (int i = 1; i < this->numIndividuals; i++)  // if 'numIndividuals' is odd, the last individual is skipped
@@ -221,7 +221,7 @@ void GeneticAlgorithm::mutate(float probab)
 		{
 			noise.at(j) = distribution(generator);
 			int sample = rand() % 100;
-			if (sample < 80)
+			if (sample < probabPercent)
 				mask.at(j) = 1;
 		}
 
