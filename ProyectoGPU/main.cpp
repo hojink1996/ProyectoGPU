@@ -77,9 +77,9 @@ void main()
 void main()
 {
 	std::vector<float> linearIndividual;
-	int individual = 2;
-	int epoch = 100;
-	int NUMBER_OF_ITEMS = 21;
+	int individual = 1;
+	int epoch = 30;
+	int NUMBER_OF_ITEMS = 21 * 16;
 	ifstream data_file;      // NOW it's ifstream
 	data_file.open("individual_" + std::to_string(individual) + "epoch_" + std::to_string(epoch) + ".bin", ios::in | ios::binary);
 	linearIndividual.resize(NUMBER_OF_ITEMS);
