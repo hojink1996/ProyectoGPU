@@ -15,17 +15,18 @@ __global__ void multiplyKernel(const float* firstInput, const float* secondInput
 	output[index] = firstInput[index] * secondInput[index];
 }
 
-__global__ void maskedAddKernel(const float* firstInput, const float* secondInput, const int* mask, float* output)
+__global__ void maskedAddKernel(const float* firstInput, const float* secondInput, 
+	const int* mask, float* output)
 {
 	int index = blockDim.x * blockIdx.x + threadIdx.x;
 	output[index] = firstInput[index] + secondInput[index] * mask[index];
 }
 
-__global__ void softplusKernel(const float* input, float* output)
-{
-	int index = blockDim.x * blockIdx.x + threadIdx.x;
-	output[index] = logf(1 + expf(input[index]));
-}
+		__global__ void softplusKernel(const float* input, float* output)
+		{
+			int index = blockDim.x * blockIdx.x + threadIdx.x;
+			output[index] = logf(1 + expf(input[index]));
+		}
 
 __global__ void dotProductCuda(const float* firstInput, const float* secondInput, float* output)
 {
@@ -50,30 +51,25 @@ __global__ void dotProductCuda(const float* firstInput, const float* secondInput
 	}
 }
 
-__global__ void dotProductWindowCuda(const float* firstInput, const float* secondInput, const int N, float* output)
-{
-	// Dynamically allocate the shared memory
-	__shared__ float sharedMemory[BLOCK_SIZE];
-	int multiplyX = blockDim.x * blockIdx.x + threadIdx.x;
-	sharedMemory[threadIdx.x] = firstInput[multiplyX] * secondInput[multiplyX % N];
-
-	int tIdx = threadIdx.x;
-
-	// All of the threads must be done with the multiplication
-	__syncthreads();
-
-	// Add the values in the block
-	int offset = blockDim.x * blockIdx.x;
-	if (threadIdx.x == 0)
-	{
-		for (int i = 0; i < BLOCK_SIZE; ++i)
+		__global__ void dotProductWindowCuda(const float* firstInput, const float* secondInput, 
+			const int N, float* output)
 		{
-			output[(offset + i) / N] += sharedMemory[i];
-		}
-	}
+			// Dynamically allocate the shared memory
+			__shared__ float sharedMemory[BLOCK_SIZE];
+			int multiplyX = blockDim.x * blockIdx.x + threadIdx.x;
+			sharedMemory[threadIdx.x] = firstInput[multiplyX] * secondInput[multiplyX % N];
 
-	//printf("(%i) out: %f, %f, %f, %f\n", multiplyX, output[0], output[1], output[2], output[3]);
-}
+			// All of the threads must be done with the multiplication
+			__syncthreads();
+
+			// Add the values in the block
+			int offset = blockDim.x * blockIdx.x;
+			if (threadIdx.x == 0)
+			{
+				for (int i = 0; i < BLOCK_SIZE; ++i)
+					output[(offset + i) / N] += sharedMemory[i];
+			}
+		}
 
 namespace CudaFunctions
 {

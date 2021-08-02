@@ -9,7 +9,8 @@
 #include "individual.h"
 #include "operations.cuh"
 
-GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair, int numThreads)
+GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair, int numThreads,
+	bool training, bool parallelize)
 {
 	assert(iniNumIndividuals > 1);
 	assert(numOpponents > 0);
@@ -19,10 +20,12 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 	this->numOpponents = numOpponents;
 	this->numGamesPerPair = numGamesPerPair;
 	this->timePerGeneration = {};
+	this->training = training;
+	this->parallelize = parallelize;
 	
 	for (int i = 0; i < this->numIndividuals; i++) 
 	{
-		LinearAgent* agent = new LinearAgent(21);
+		LinearAgent* agent = new LinearAgent(21, this->parallelize);
 		Player* player = new Player(*agent);
 		Individual individual = Individual(player);
 		this->currentIndividuals.push_back(individual);
@@ -33,7 +36,7 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 void GeneticAlgorithm::compete(Individual& individual, Individual& individual2)
 {
 	// Create a game of TexasHoldem
-	TexasHoldem game = TexasHoldem(Deck(), StraightIdentifier());
+	TexasHoldem game = TexasHoldem(Deck(), StraightIdentifier(), 100, 1, !this->training);
 	game.addPlayer(individual.getPlayer());
 	game.addPlayer(individual2.getPlayer());
 	game.playMultipleRounds(this->numGamesPerPair);
@@ -87,18 +90,36 @@ void GeneticAlgorithm::evaluatePairOfPlayers()
 	this->currentIndividuals[secondIndividualIndex].endPlaying();
 }
 
-void GeneticAlgorithm::evaluate()
+float GeneticAlgorithm::evaluate()
 {
 	// Make players to play against numOpponent players
 	ThreadPool thread_pool(this->numThreads);
 	for (int i = 0; i < this->numIndividuals; i++)
 	{
 		for (int j = 0; j < this->numOpponents; j++){
-			thread_pool.enqueue([](GeneticAlgorithm *ga) {(*ga).evaluatePairOfPlayers(); }, this);
+			if (this->parallelize)
+				thread_pool.enqueue([](GeneticAlgorithm *ga) {(*ga).evaluatePairOfPlayers(); }, this);
+			else
+			{
+				int randIdx = rand() % this->numIndividuals;
+				while (randIdx == i)
+					randIdx = rand() % this->numIndividuals;
+
+				// Let individuals compete
+				this->compete(this->currentIndividuals[i], this->currentIndividuals[randIdx]);
+
+				// Update individuals' score after the competition
+				this->currentIndividuals[i].updateScore();
+				this->currentIndividuals[randIdx].updateScore();
+
+				// Add  to number of played games
+				this->currentIndividuals[i].addPlayedCompetition();
+				this->currentIndividuals[randIdx].addPlayedCompetition();
+			}
 		}
 	}
 	float scoreDifference = this->currentIndividuals[0].getScore() - this->scoreOfTheBestAtPreviousEpoch;
-	std::cout << "Difference of score of the best individual: " << scoreDifference << std::endl;
+	return scoreDifference;
 }
 
 void GeneticAlgorithm::selectBest(float ratio)
@@ -113,7 +134,12 @@ void GeneticAlgorithm::selectBest(float ratio)
 	for (int i = 0; i < this->currentIndividuals.size(); i++)
 	{
 		// Convert score with Softplus so that all scores are positive
-		float rawScore = this->currentIndividuals[i].getScore() / (this->currentIndividuals[i].getNumPlayedCompetitions());
+		float rawScore;
+		int numPlayedCompetitions = this->currentIndividuals[i].getNumPlayedCompetitions();
+		if (numPlayedCompetitions == 0)
+			rawScore = 0;
+		else
+			rawScore = this->currentIndividuals[i].getScore() / (this->currentIndividuals[i].getNumPlayedCompetitions());
 		scores.push_back(rawScore);
 		if (rawScore > maxScore)
 		{
@@ -124,8 +150,13 @@ void GeneticAlgorithm::selectBest(float ratio)
 	}
 
 	std::vector<float> transformedScores(this->numIndividuals, 0);
-	CudaFunctions::softplus(&scores[0], this->currentIndividuals.size(), &transformedScores[0]);
-
+	if (this->parallelize)
+		CudaFunctions::softplus(&scores[0], this->currentIndividuals.size(), &transformedScores[0]);
+	else
+	{
+		for (int i = 0; i < this->numIndividuals; ++i)
+			transformedScores.at(i) = std::log(1 + std::exp(scores.at(i)));
+	}
 	std::discrete_distribution<> distrib(transformedScores.begin(), transformedScores.end()); // Create the distribution
 
 	// Elitism: the individual with the highest score always survives in this selection
@@ -171,7 +202,7 @@ void GeneticAlgorithm::mutate(float probab)
 {
 	assert(probab <= 1.0f && probab >= 0.0f);
 
-	int probabPercent = (int)probab * 00;
+	int probabPercent = (int) (probab * 100);
 
 	// Starting from i=1 because the best individual (at position 0) has to be kept
 	for (int i = 1; i < this->numIndividuals; i++)  // if 'numIndividuals' is odd, the last individual is skipped
@@ -190,7 +221,7 @@ void GeneticAlgorithm::mutate(float probab)
 		{
 			noise.at(j) = distribution(generator);
 			int sample = rand() % 100;
-			if (sample < 80)
+			if (sample < probabPercent)
 				mask.at(j) = 1;
 		}
 
@@ -214,11 +245,11 @@ Individual GeneticAlgorithm::getIndividualByIndex(int idx)
 	return this->currentIndividuals.at(idx);
 }
 
-void GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
+float GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
 {
 	auto preRun = std::chrono::high_resolution_clock::now();
 	std::cout << "Evaluating..." << std::endl;
-	this->evaluate();
+	float scoreDifference = this->evaluate();
 
 	std::cout << "Selecting best individuals..." << std::endl;
 	this->selectBest(selectBestRatio);
@@ -228,10 +259,14 @@ void GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
 
 	std::cout << "Mutating..." << std::endl;
 	this->mutate(mutateProbab);
+
 	auto afterRun = std::chrono::high_resolution_clock::now();
-	this->timePerGeneration.push_back(std::chrono::duration_cast<std::chrono::seconds>(afterRun - preRun));
+	std::chrono::seconds epochTime = std::chrono::duration_cast<std::chrono::seconds>(afterRun - preRun);
+	this->timePerGeneration.push_back(epochTime);
+	std::cout << "Current epoch took: " << epochTime.count() << " s" << std::endl;
 
 	this->resetIndividuals();
+	return scoreDifference;
 }
 
 std::vector<std::chrono::seconds> GeneticAlgorithm::getTimePerGeneration()

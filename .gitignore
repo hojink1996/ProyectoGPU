@@ -6,6 +6,8 @@
 *.vcxproj
 *.vcxproj.filters
 enc_temp_folder/*
+ProyectoGPU/individual_*
+ProyectoGPU/logs/
 
 # User-specific files
 *.rsuser

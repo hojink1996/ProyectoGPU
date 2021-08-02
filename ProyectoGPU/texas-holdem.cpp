@@ -9,11 +9,11 @@
 
 TexasHoldem::TexasHoldem(int numPlayers, Agent& decisionAgent, Deck& deck,
 	StraightIdentifier& straightIdentifier, int startingStack, int smallBlindValue,
-	bool printPlaysAndHands) : currentDeck(deck), straightIdentifier(straightIdentifier)
+	bool print) : currentDeck(deck), straightIdentifier(straightIdentifier)
 {
 	deck.reset();
 	this->startingStack = startingStack;
-	this->printPlaysAndHands = printPlaysAndHands;
+	this->print = print;
 	this->dealerPosition = 0;
 	this->currentGameState = GameState::Invalid;
 	this->numPlayers = numPlayers;
@@ -36,10 +36,10 @@ TexasHoldem::TexasHoldem(int numPlayers, Agent& decisionAgent, Deck& deck,
 Constructor without specifying number of players.
 */
 TexasHoldem::TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, float startingStack,
-	int smallBlindValue, bool printPlaysAndHands) : currentDeck(deck), straightIdentifier(straightIdentifier)
+	int smallBlindValue, bool print) : currentDeck(deck), straightIdentifier(straightIdentifier)
 {
 	deck.reset();
-	this->printPlaysAndHands = printPlaysAndHands;
+	this->print = print;
 	this->startingStack = startingStack;
 	this->numPlayers = 0;
 	this->dealerPosition = 0;
@@ -78,14 +78,17 @@ void TexasHoldem::dealCards()
 	{
 		for (auto player : this->players)
 		{
-			(*player).addCardToHand(this->getNextCard(), cardNumber);
+			Card card = this->getNextCard();
+			(*player).addCardToHand(card, cardNumber);
+			if (static_cast<int>(card.second) == 13)
+				std::cout << "dfs" << std::endl;
 		}
 	}
 }
 
 void TexasHoldem::drawFlop()
 {
-	if (this->printPlaysAndHands)
+	if (this->print)
 		std::cout << "FLOP\n\n";
 	this->currentGameState = GameState::Flop;
 	if (this->onlyOnePlayerLeft())
@@ -96,7 +99,7 @@ void TexasHoldem::drawFlop()
 
 void TexasHoldem::drawTurn()
 {
-	if (this->printPlaysAndHands)
+	if (this->print)
 		std::cout << "TURN\n\n";
 	this->currentGameState = GameState::Turn;
 	if (this->onlyOnePlayerLeft())
@@ -106,7 +109,7 @@ void TexasHoldem::drawTurn()
 
 void TexasHoldem::drawRiver()
 {
-	if (this->printPlaysAndHands)
+	if (this->print)
 		std::cout << "RIVER\n\n";
 	this->currentGameState = GameState::River;
 	if (this->onlyOnePlayerLeft())
@@ -130,7 +133,7 @@ void TexasHoldem::resetPlayers()
 
 void TexasHoldem::beginRound()
 {
-	if (this->printPlaysAndHands)
+	if (this->print)
 		std::cout << "PRE-FLOP\n\n";
 	this->currentlyPlayingPlayers = this->numPlayers;
 	this->currentTotalBetAmount = 0;
@@ -581,6 +584,14 @@ std::vector<int> TexasHoldem::determineWinner()
 			assert(index >= 0);
 		assert(winningIndex.size() > 0);
 	}
+
+	if (this->print)
+	{
+		std::cout << "WINNER: ";
+		for (int index : winningIndex)
+			std::cout << index << " ";
+		std::cout << "\n";
+	}
 	return winningIndex;
 }
 
@@ -791,7 +802,15 @@ void TexasHoldem::printSharedCards()
 void TexasHoldem::playMultipleRounds(int numberOfRounds)
 {
 	for (int round = 0; round < numberOfRounds; ++round)
+	{
+		if (this->print)
+		{
+			std::cout << "===============================\n";
+			std::cout << "STARTING ROUND " << round << std::endl;
+		}
 		this->playRound();
+	}
+		
 }
 
 bool TexasHoldem::allPlayersAllIn()
@@ -861,7 +880,7 @@ void TexasHoldem::bettingRound()
 
 	while (true)
 	{
-		if (this->printPlaysAndHands)
+		if (this->print)
 		{
 			this->printPlayerHand(currentPosition);
 			this->printSharedCards();
@@ -877,7 +896,7 @@ void TexasHoldem::bettingRound()
 
 			if (currentPlayerDecision.play == Play::Raise)
 			{
-				if (this->printPlaysAndHands)
+				if (this->print)
 				{
 					std::cout << "The player raises: " << currentPlayerDecision.betAmount << std::endl;
 				}
@@ -890,7 +909,7 @@ void TexasHoldem::bettingRound()
 			}
 			else if (currentPlayerDecision.play == Play::Call)
 			{
-				if (this->printPlaysAndHands)
+				if (this->print)
 				{
 					std::cout << "The player calls." << std::endl;
 				}
@@ -904,7 +923,7 @@ void TexasHoldem::bettingRound()
 			}
 			else
 			{
-				if (this->printPlaysAndHands)
+				if (this->print)
 				{
 					std::cout << "The player folds." << std::endl;
 				}
@@ -976,7 +995,7 @@ void TexasHoldem::addCurrentHandCards(State& state, int playerIndex)
 	{
 		if (static_cast<int>(card.second) == 13)
 		{
-			std::cout << "Invalid hand" << std::endl;
+			std::cout << "Invalid hand";
 			break;
 		}
 		numberOfCards[static_cast<int>(card.second)] += 1;
