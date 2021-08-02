@@ -36,8 +36,6 @@ void writeLog(const std::string& text)
 	log_file << text << endl;
 }
 
-
-
 void main()
 {
 	int iniNumIndividuals = 1000;
