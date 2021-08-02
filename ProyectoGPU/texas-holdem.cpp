@@ -78,7 +78,10 @@ void TexasHoldem::dealCards()
 	{
 		for (auto player : this->players)
 		{
-			(*player).addCardToHand(this->getNextCard(), cardNumber);
+			Card card = this->getNextCard();
+			(*player).addCardToHand(card, cardNumber);
+			if (static_cast<int>(card.second) == 13)
+				std::cout << "dfs" << std::endl;
 		}
 	}
 }
@@ -992,7 +995,7 @@ void TexasHoldem::addCurrentHandCards(State& state, int playerIndex)
 	{
 		if (static_cast<int>(card.second) == 13)
 		{
-			std::cout << "Invalid hand" << std::endl;
+			std::cout << "Invalid hand";
 			break;
 		}
 		numberOfCards[static_cast<int>(card.second)] += 1;

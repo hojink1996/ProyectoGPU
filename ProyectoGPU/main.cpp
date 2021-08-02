@@ -14,24 +14,31 @@
 #include "operations.cuh"
 
 
+using namespace std;
+
+/*
+Save the loss por epoch in a text file.
+@param epoch:	The current epoch
+@param text:	A string that contains the loss value
+*/
 void saveLoss(int epoch, const std::string& text)
 {
-	std::ofstream log_file(
-		"logs/loss.txt", std::ios_base::out | std::ios_base::app);
-	log_file << "Epoch " << epoch << " - " << text << std::endl;
+	ofstream log_file("logs/loss.txt", ios_base::out | ios_base::app);
+	log_file << "Epoch " << epoch << " - " << text << endl;
 }
 
-using namespace std;
 
 
 void main()
 {
-	
-	int iniNumIndividuals = 300;
+	int iniNumIndividuals = 5000;
 	int numOpponents = 5;
 	int numGamesPerPair = 20;
 	int saveEvery = 10;
-	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair, 32, true);
+	int numThreads = 32;
+	bool training = true;
+	bool parallelize = false;
+	GeneticAlgorithm ga = GeneticAlgorithm(iniNumIndividuals, numOpponents, numGamesPerPair, numThreads, training, parallelize);
 
 	float selectBestRatio = 1.0;
 	float mutateProbab = 0.1;

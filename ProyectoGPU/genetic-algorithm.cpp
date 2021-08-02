@@ -9,7 +9,8 @@
 #include "individual.h"
 #include "operations.cuh"
 
-GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair, int numThreads, bool training)
+GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int numGamesPerPair, int numThreads,
+	bool training, bool parallelize)
 {
 	assert(iniNumIndividuals > 1);
 	assert(numOpponents > 0);
@@ -20,10 +21,11 @@ GeneticAlgorithm::GeneticAlgorithm(int iniNumIndividuals, int numOpponents, int 
 	this->numGamesPerPair = numGamesPerPair;
 	this->timePerGeneration = {};
 	this->training = training;
+	this->parallelize = parallelize;
 	
 	for (int i = 0; i < this->numIndividuals; i++) 
 	{
-		LinearAgent* agent = new LinearAgent(21);
+		LinearAgent* agent = new LinearAgent(21, this->parallelize);
 		Player* player = new Player(*agent);
 		Individual individual = Individual(player);
 		this->currentIndividuals.push_back(individual);
@@ -95,7 +97,25 @@ float GeneticAlgorithm::evaluate()
 	for (int i = 0; i < this->numIndividuals; i++)
 	{
 		for (int j = 0; j < this->numOpponents; j++){
-			thread_pool.enqueue([](GeneticAlgorithm *ga) {(*ga).evaluatePairOfPlayers(); }, this);
+			if (this->parallelize)
+				thread_pool.enqueue([](GeneticAlgorithm *ga) {(*ga).evaluatePairOfPlayers(); }, this);
+			else
+			{
+				int randIdx = rand() % this->numIndividuals;
+				while (randIdx == i)
+					randIdx = rand() % this->numIndividuals;
+
+				// Let individuals compete
+				this->compete(this->currentIndividuals[i], this->currentIndividuals[randIdx]);
+
+				// Update individuals' score after the competition
+				this->currentIndividuals[i].updateScore();
+				this->currentIndividuals[randIdx].updateScore();
+
+				// Add  to number of played games
+				this->currentIndividuals[i].addPlayedCompetition();
+				this->currentIndividuals[randIdx].addPlayedCompetition();
+			}
 		}
 	}
 	float scoreDifference = this->currentIndividuals[0].getScore() - this->scoreOfTheBestAtPreviousEpoch;
@@ -114,7 +134,12 @@ void GeneticAlgorithm::selectBest(float ratio)
 	for (int i = 0; i < this->currentIndividuals.size(); i++)
 	{
 		// Convert score with Softplus so that all scores are positive
-		float rawScore = this->currentIndividuals[i].getScore() / (this->currentIndividuals[i].getNumPlayedCompetitions());
+		float rawScore;
+		int numPlayedCompetitions = this->currentIndividuals[i].getNumPlayedCompetitions();
+		if (numPlayedCompetitions == 0)
+			rawScore = 0;
+		else
+			rawScore = this->currentIndividuals[i].getScore() / (this->currentIndividuals[i].getNumPlayedCompetitions());
 		scores.push_back(rawScore);
 		if (rawScore > maxScore)
 		{
@@ -125,8 +150,13 @@ void GeneticAlgorithm::selectBest(float ratio)
 	}
 
 	std::vector<float> transformedScores(this->numIndividuals, 0);
-	CudaFunctions::softplus(&scores[0], this->currentIndividuals.size(), &transformedScores[0]);
-
+	if (this->parallelize)
+		CudaFunctions::softplus(&scores[0], this->currentIndividuals.size(), &transformedScores[0]);
+	else
+	{
+		for (int i = 0; i < this->numIndividuals; ++i)
+			transformedScores.at(i) = std::log(1 + std::exp(scores.at(i)));
+	}
 	std::discrete_distribution<> distrib(transformedScores.begin(), transformedScores.end()); // Create the distribution
 
 	// Elitism: the individual with the highest score always survives in this selection
@@ -219,7 +249,7 @@ float GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
 {
 	auto preRun = std::chrono::high_resolution_clock::now();
 	std::cout << "Evaluating..." << std::endl;
-	float scpreDifference = this->evaluate();
+	float scoreDifference = this->evaluate();
 
 	std::cout << "Selecting best individuals..." << std::endl;
 	this->selectBest(selectBestRatio);
@@ -236,7 +266,7 @@ float GeneticAlgorithm::trainOneEpoch(float selectBestRatio, float mutateProbab)
 	std::cout << "Current epoch took: " << epochTime.count() << " s" << std::endl;
 
 	this->resetIndividuals();
-	return epochTime.count();
+	return scoreDifference;
 }
 
 std::vector<std::chrono::seconds> GeneticAlgorithm::getTimePerGeneration()

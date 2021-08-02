@@ -123,9 +123,10 @@ void RandomAgent::assignStrategy(std::vector<float> strategy, int idx)
 {
 }
 
-LinearAgent::LinearAgent(int thetaSize)
+LinearAgent::LinearAgent(int thetaSize, bool parallelize)
 {
 	assert(thetaSize > 0);
+	this->parallelize = parallelize;
 	for (int i = 0; i < thetaSize * 16; i++) // First 1/3 is to compute Fold, second 2/3 for Call, and rest for amount
 	{
 		// Fill with random values between -1 and 1
@@ -133,25 +134,11 @@ LinearAgent::LinearAgent(int thetaSize)
 	}
 }
 
-LinearAgent::LinearAgent(std::vector<float> theta)
+LinearAgent::LinearAgent(std::vector<float> theta, bool parallelize)
 {
 	assert(theta.size() > 0);
+	this->parallelize = parallelize;
 	std::copy(theta.begin(), theta.end(), back_inserter(this->theta));
-}
-
-
-float LinearAgent::computeAmount(int gameStateIdx, State& state)
-{
-	int stateSize = sizeof(state.values) / sizeof(state.values[0]);
-	assert(stateSize * 16 == this->theta.size());
-
-	int offset = gameStateIdx * stateSize * 4;  // Offset to operate with the theta corresponding to the current game state
-	float result = 0.0f;
-	for (int i = stateSize * 3; i < stateSize * 4; i++)
-	{
-		result += this->theta[offset + i] * state.values[i % stateSize];
-	}
-	return result;
 }
 
 Decision LinearAgent::makeDecision(int gameStateIdx, State& state, int minRaise, int maxRaise)
@@ -172,8 +159,19 @@ Decision LinearAgent::makeDecision(int gameStateIdx, State& state, int minRaise,
 	// Compute linear combination
 	int offset = gameStateIdx * stateSize;  // Offset to operate with the theta corresponding to the current game state
 	std::vector<float> result(4, 0);  // fold, call, raise
-	CudaFunctions::dotProductWindow(&this->theta[offset], &state.values[0], stateSize, &result[0], result.size());
 
+	if (this->parallelize)
+		CudaFunctions::dotProductWindow(&this->theta[offset], &state.values[0], stateSize, &result[0], result.size());
+	else
+	{
+		// Compute linear combination
+		std::vector<float> result = { 0, 0, 0, 0};  // fold, call, raise, amount
+		for (int i = 0; i < this->theta.size(); i++)
+		{
+			result.at(i / (stateSize*16)) += this->theta[i] * state.values[i % (stateSize * 16)];
+		}
+			
+	}
 	// Get argmax
 	int maxIdx = std::distance(result.begin(), std::max_element(result.begin(), result.end()));
 

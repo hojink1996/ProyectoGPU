@@ -49,9 +49,6 @@ handles the resetting of the player's hand and deck.
 class TexasHoldem
 {
 private:
-	/*
-	Internal private parameters needed for the class.
-	*/
 	bool print;
 	Deck& currentDeck;
 	StraightIdentifier& straightIdentifier;
@@ -168,31 +165,88 @@ private:
 	std::pair<Suit, Value> getNextCard();
 	uint64_t computeCardValue(Value cardValue, int shiftedBitPositions);
 
+	/*
+	Functions to evaluate specific conditions of the game: Whether if all players have bet all their stack, 
+	and whether if only one player is active in the game. 
+	*/
 	bool allPlayersAllIn();
 	bool onlyOnePlayerLeft();
 
+	/*
+	Functions that construct the state vector of the game for a given player, assuming that the game only has two players.
+	It contains:
+	1. The last raised amount.
+	2. The current amount in the pocket of the player.
+	3. The current amount in the pocket of the opponent.
+	4. The so-far bet amount.
+	5. A vector of size 13 that contains the number of cards of each value that the player has (including the shared cards).
+	6. A vector of size 4 that contains the number of cards of each suit that the player has (including the shared cards).
+
+	@param state:			Reference to the state vector
+	@param playerIndex:		Index of the player for which the state belongs
+	*/
 	void addLastBetDelta(State& state);
 	void addMoneyLeftPlayer(State& state, int playerIndex);
 	void addMoneyLeftOponent(State& state, int playerIndex);
 	void addPlayerBetAmount(State& state, int playerIndex);
 	void addCurrentHandCards(State& state, int playerIndex);
 	void addCurrentHandSuits(State& state, int playerIndex);
+
+	/*
+	Print the cards in the terminal.
+	*/
 	void printPlayerHand(int playerIndex);
 	void printSharedCards();
+
+	/*
+	Convert suit and value to string.
+	*/
 	std::string suitToString(Suit suit);
 	std::string valueToString(Value value);
 public:
 	TexasHoldem(int numPlayers, Agent& decisionAgent, Deck& deck, StraightIdentifier& straightIdentifier, int startingStack=1000,
 		int smallBlindValue=1, bool print=false);
+	
+	/*
+	Constructor without defining the number of players, which is set to 0.
+	*/
 	TexasHoldem(Deck& deck, StraightIdentifier& straightIdentifier, float startingStack=1000, int smallBlindValue=1, 
 		bool print=false);
+
+	/*
+	Function that evaluates the value of a hand.
+	@param hand:		The hand of cards to be evaluated.
+	@param handValue:	The initial hand value, set to 0.
+
+	@return:	A HandValue object that indicates the categorty of the hand.
+	*/
 	HandValue evaluateHand(Hand& hand, uint64_t& handValue);
+
+	/*
+	Function that adds a player to the game.
+	@param player:		Pointer to the player to be added.
+	*/
 	void addPlayer(Player* player);
-	void setSharedCards(std::array<Card, 5>& sharedCards);
+
+	/*
+	Function that simulate a round of the game.
+	*/
 	void playRound();
-	State getStateOfPlayer(int idx);
+
+	/*
+	Function to make the players play multiple times.
+	*/
 	void playMultipleRounds(int numberOfRounds);
 
+	/*
+	Set the value for the shared cards.
+	*/
+	void setSharedCards(std::array<Card, 5>& sharedCards);
+
+	/*
+	Function that returns the state vector of a player by its index.
+	*/
+	State getStateOfPlayer(int idx);
 };
 
 
